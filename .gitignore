@@ -1,3 +1,6 @@
+.gitignore
+.gitattributes
+
 # Ignore DS_Store files (MacOs)
 .DS_Store
 
