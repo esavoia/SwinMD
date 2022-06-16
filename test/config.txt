@@ -1,0 +1,28 @@
+sysData.in	coordinate.in		// input file names
+result.out	restart.out    	dump.out	// out put file names
+f	trajactory.out	// writeTrajectory; trajactory file name
+t	1	f	velocity.in		//isNewStart;  seed; readVelocity;  velocityFile 
+0.001	20	0	// timeStep;  numSteps;  startSteps
+1	1		// nonbondTsFrequency;   longElectTsFrequency 
+10	10	10	//computeAvgTsFreq;  printTsFreq;  backupTsFreq
+2			//integrator type: 0-Gear; 1-Velocity Verlet; 2-leap frog
+1	280	0.101	1   1.0 NoseHoover  0.5  // ensembleStatus(0-NVT, 1-NPT);   Temperature;  Volume/Pressure; 1:atom/2:molec; coup_const; thermostat; Barostat
+0	0.0	  	//testMode(0-equlibrium, 1-compress, 2-shear, 3-elongate);  rate
+1.10	1.10	14	0.1	// cutoff;	cutoffEw;	kCutoff;	cutBuffer
+100.085    			// density [particle no/cubic Nm]	
+1.0	1.0	1.0	// lxBox;	lyBox;	lzBox;
+f	1.5		// useCellPairList	cellSideLen
+0	0.00001 2	0.01	// constrainMode(0-none, 1-Gaussan, 2-Shake);CFB/Tolreance; DFB/maxLoopNum(10000)/bendType(1:harmo 2:amoeba);
+t	16015.275	0.15537	// computeharmoUB;  klUB;  l0UB
+t	t	0.98	// long range correction;  switchOn;  switchDistance	
+f	f	t	f	2.02	18.60	// computeCoulomb; computeEwald; surfaceCorrect; computeWolf; alpha; kCutOff
+t	t	t	t	t	f	1.10	0.39	// computeMultipole;   computeInduction;  computeTorques;  dampInduction; doInductionMin; dampAmoeba; cutoffInd; a_damping;
+t       14      7       0.07	0.12	0.91  // computeBuffvdW;  nBuff;  mBuff; deltaBuff; gammaBuff;  Hfactor; 
+f       12      6       // computeMie;  n-exp;  m-exp
+f	f		// hasExtForces;	hasFixedAtom
+30000	20		// start sampling steps;    samplingTsFreq
+f	0	0	// useTTCF	startTTCF	ttcfTsFreq
+t	400		// computeRDF;  bin number
+f	molTraMCYID-450.xyz		// computeMSD; molecular trajectory file name
+f	molVelMCYID.out		// computeVACF; molecular velocity file name
+t			// Lustig Averages
