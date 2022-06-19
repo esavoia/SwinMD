@@ -1,4 +1,4 @@
-/** Integrator.cpp -- 
+/** Integrator.cpp --
  **
  ** Copyright (C) 2003
  ** Centre for Molecular Simulation (CMS)
@@ -11,6 +11,7 @@
  **/
 // JC modified by Jianhui LI to comply with the new compiler
 #include "Integrator.h"
+#include "Errors.h"
 
 Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
 {
@@ -24,7 +25,7 @@ Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
     molNDF = 3*numMols - 3;                                          // Degrees of Freedom to Compute T
     if (mySimConfig->is_constraint_on())
         atomNDF = 6*numMols - 3;   // Degrees of Freedom for CO2 ??
-    else 
+    else
         atomNDF = 3*numAtoms - 3;                                    // Degrees of Freedom to Compute T
     useAtomThermo = mySimConfig->use_atom_thermo();
     timeStep = mySimConfig->get_timestep();
@@ -33,8 +34,8 @@ Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
     numTimeSteps = mySimConfig->get_n_steps();
     dumpFile = mySimConfig->get_dump_file();
     drMax = mySimConfig->get_cutBuff()*mySimConfig->get_cutBuff()/4.0;
-    temperature = mySimConfig->get_temperature(); 
-    thermotype = mySimConfig->get_thermo_type(); 
+    temperature = mySimConfig->get_temperature();
+    thermotype = mySimConfig->get_thermo_type();
 	molTemp = temperature;
     atomTemp = temperature;
     couplconst = mySimConfig->get_coupl_const();
@@ -72,7 +73,7 @@ Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
     nnhpl = 0.0;
     nnhmi = 0.0;
     Mtot = 0.0;
-    volume = myEnsemble->boxLx*myEnsemble->boxLy*myEnsemble->boxLz; 
+    volume = myEnsemble->boxLx*myEnsemble->boxLy*myEnsemble->boxLz;
     Vpl   = volume;
     Vmin  = volume;
 
@@ -93,7 +94,7 @@ Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
     inductionForce = NULL;
     wolfForce = NULL;
     // constraintForce = NULL;
-    nccForce = NULL; //JC 
+    nccForce = NULL; //JC
     has_angle_force = false;
     has_bond_force = false;
     has_constr_force = false;
@@ -104,15 +105,15 @@ Integrator::Integrator(Ensemble* ensemble, SimConfiguration* simConfig)
     computeWolf  = false;
     computeBuff  = false;
     // has_elec_force = false;
-    // ofo  = new ofstream("state.out", ios::out); // JC 
+    // ofo  = new ofstream("state.out", ios::out); // JC
 }
 
 void Integrator::initialise()
 {
-    // initialise forces 
-      
+    // initialise forces
+
     //nccForce = new NccForce(myEnsemble);
-         
+
     if (mySimConfig->compute_buffamoeba())
     {
 	computeBuff = true;
@@ -138,24 +139,24 @@ void Integrator::initialise()
     if (mySimConfig->compute_ewald_force())
     {
         computeEwald = true;
-        ewaldForce = new EwaldForce(myEnsemble);       
+        ewaldForce = new EwaldForce(myEnsemble);
         // forceGroup.push_back(ewaldForce);
     }
     if (mySimConfig->compute_multipol())
     {
         computeMultipole = true;
-        multiElec = new Multipole(myEnsemble);       
+        multiElec = new Multipole(myEnsemble);
 
         if (mySimConfig->compute_induction())
         {
             computeInduction = true;
-            inductionForce = new Induction(myEnsemble);       
+            inductionForce = new Induction(myEnsemble);
 	}
     }
     if (mySimConfig->compute_wolf())
     {
         computeWolf = true;
-        wolfForce = new WolfForce(myEnsemble);       
+        wolfForce = new WolfForce(myEnsemble);
         // forceGroup.push_back(ewaldForce);
     }
     if (mySimConfig->is_constraint_on()&&(numBonds > 0))
@@ -198,22 +199,22 @@ void Integrator::initialise()
     {
         // has_improper_force = true;
         // improperForce = new ImproperForce(myEnsemble);
-    } 
+    }
 }
 
 void Integrator :: computePressure()
 {
-    Double molCorrectVirial[9];            
+    Double molCorrectVirial[9];
     Molecule* mol;
     Atom* atom;
 
     if (statEnsem == 1){
-        volume = myEnsemble->boxLx*myEnsemble->boxLy*myEnsemble->boxLz; 
+        volume = myEnsemble->boxLx*myEnsemble->boxLy*myEnsemble->boxLz;
     }
     for (Int i = XX; i <= ZZ; i++)
         molCorrectVirial[i] = 0.0;
     for (Int i = 0; i < numMols; i++)
-    {  
+    {
         mol = &myMols[i];
         Vector3 Ri = mol->massCenter;
         for (Int j = 0; j < mol->numAtoms; j++)
@@ -232,7 +233,7 @@ void Integrator :: computePressure()
         }
     }
     for (Int i = XX; i <= ZZ; i++)
-        myEnsemble->molVirial[i] = myEnsemble->virial[i] - molCorrectVirial[i]; 
+        myEnsemble->molVirial[i] = myEnsemble->virial[i] - molCorrectVirial[i];
 
     for (Int i = 0; i < numAtoms; i++)
     {
@@ -248,7 +249,7 @@ void Integrator :: computePressure()
     myEnsemble->atomPressure[ZX] = myEnsemble->atomPressure[XZ];
     myEnsemble->atomPressure[ZY] = myEnsemble->atomPressure[YZ];
     for (Int i = 0; i < numMols; i++)
-    {  
+    {
         mol = &myMols[i];
         myEnsemble->molPressure[XX] += mol->momenta.x*mol->momenta.x/mol->mass;
         myEnsemble->molPressure[XY] += mol->momenta.x*mol->momenta.y/mol->mass;
@@ -268,12 +269,12 @@ void Integrator :: computePressure()
     }
 }
 
-//Jc: both the position and real positions are output every sampling time steps 
+//Jc: both the position and real positions are output every sampling time steps
 //Jc: real position are used in the next simulation for calcualtion of the diffusion
-//Jc:             
+//Jc:
 void Integrator :: write_state()
 {
-    // write configurations to default file 
+    // write configurations to default file
 //    ofstream ofo = ofstream("state.out", ios::out);
     ofo = new ofstream("state.out", ios::out);
     *ofo << "Coordinate at step: " << currentSteps << endl;
@@ -306,7 +307,7 @@ void Integrator :: write_statexyz()
     string namef("stateout");
     string posit(9,'0');
     string stepxyz = to_string(currentSteps);
-    posit.replace(posit.end()-stepxyz.size(),posit.end(),stepxyz);  
+    posit.replace(posit.end()-stepxyz.size(),posit.end(),stepxyz);
     ofo = new ofstream(posit+namef+base, ios::out);
     *ofo << numAtoms << endl;
     *ofo << "output xyz by SwinMD" << endl;
@@ -319,13 +320,13 @@ void Integrator :: write_statexyz()
 
 void Integrator :: write_mol_position(Molecule *mol, ofstream &of)
 {
-     of<<"mol["<< mol->molID <<"] ";  
+     of<<"mol["<< mol->molID <<"] ";
      for (Int j = 0; j < mol->numAtoms; j++)
      {
          of <<"  atom[" << mol->myAtoms[j]->atomID << "] " << mol->myAtoms[j]->position.x;
          of <<' '<<mol->myAtoms[j]->position.y<<' '<<mol->myAtoms[j]->position.z<<"   ";
      }
-     of << endl;                
+     of << endl;
 }
 
 
@@ -336,7 +337,7 @@ void Integrator :: write_bond(ofstream &of)
     Molecule* mol;
 
     for (Int i = 0; i < numMols; i++)
-    {  
+    {
         mol = &myMols[i];
         int ns = mol->numAtoms;
         if (ns <= 1)
@@ -347,7 +348,7 @@ void Integrator :: write_bond(ofstream &of)
             r12 = mol->myAtoms[1]->position - mol->myAtoms[0]->position;
             of << r12.length2() ;
         }
-        else 
+        else
         for(int site = 0; site < (ns-2); site++)
         {
             r12 = mol->myAtoms[site + 1]->position - mol->myAtoms[site]->position;
@@ -358,9 +359,9 @@ void Integrator :: write_bond(ofstream &of)
             l3 = r13.length2();
             of << l1 << ' ' << l2 << ' ' << l3;
         }
-        of << endl;                    
-    }               
-} 
+        of << endl;
+    }
+}
 
 void Integrator::set_dump_file(char* fname)
 {
@@ -371,4 +372,3 @@ void Integrator::set_result_file(ofstream* ofp)
 {
     resultFile = ofp;
 }
-

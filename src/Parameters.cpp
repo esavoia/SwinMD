@@ -1,4 +1,4 @@
-/** Parameters.cpp -- 
+/** Parameters.cpp --
  **
  ** Copyright (C) 2003
  ** Centre for Molecular Simulation (CMS)
@@ -12,6 +12,7 @@
 
 #include "Parameters.h"
 #include <iostream>
+#include "Errors.h"
 
 Parameters :: Parameters(const char* sysDataFile)
 {
@@ -84,13 +85,13 @@ void Parameters::read_sys_data(const char* sysDataFile)
     char buf[256];
     char str1[32];
     char str2[32];
-   
+
 //    #ifdef DEBUG
 //        DEBUGMSG("Reading system data");
 //    #endif
 
     FILE *fptr;
-   
+
     if(rank ==0)
     {
       if ((fptr = fopen(sysDataFile, "r")) == NULL)
@@ -154,9 +155,9 @@ void Parameters::read_sys_data(const char* sysDataFile)
 //    MPI::COMM_WORLD.Bcast(&nImproperTypes,1,MPI::DOUBLE,0);
     MPI_Bcast(&nImproperTypes,1,MPI_DOUBLE,0,MPI_COMM_WORLD);
 
-//    cout<< "the received data are.................... "<<rank<<" "<<nAngleTypes<<endl; 
+//    cout<< "the received data are.................... "<<rank<<" "<<nAngleTypes<<endl;
 
-  
+
     // allocate memory to data structures
       if(nAtomTypes)
       {
@@ -249,12 +250,12 @@ void Parameters::read_sys_data(const char* sysDataFile)
         cerr << "DBG: nDihedral: " << nDihedrals << ", nDihedralType: " << nDihedralTypes << endl;
         cerr << "DBG: nImproper: " << nImpropers << ", nImproperType: " << nImproperTypes << endl;
     #endif
-*/   
+*/
     // read atom parameters
     if(rank == 0)
     {
       if (!check_heading("!AtomParams", fptr))
-         ERRORMSG("head not match with AtomParams");       
+         ERRORMSG("head not match with AtomParams");
       if(nAtomTypes)
       {
        #ifdef DEBUG
@@ -313,14 +314,14 @@ void Parameters::read_sys_data(const char* sysDataFile)
         atomParams[i].polar  = d14;
         strcpy(atomParams[i].typeName, str1);
         strcpy(atomParams[i].atomName, str2);
-      }      
+      }
     }
 
     // read bond parameters
     if(rank == 0)
     {
       if (!check_heading("!BondParams", fptr))
-          ERRORMSG("head not match with BondParams");        
+          ERRORMSG("head not match with BondParams");
       if(nBondTypes)
       {
         #ifdef DEBUG
@@ -335,7 +336,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
             MPI_Send(buf,256,MPI_CHAR,desRank,0,MPI_COMM_WORLD);
           }
           ret = sscanf(buf, "%d%d%d%lf%lf", &v1, &v2, &v3, &d1, &d2);
-//         cout <<"sent data nBOnde  "<<rank<<" "<<v1<<" "<<v3 <<" "<<" "<<d1<<" "<<d2<<endl;       
+//         cout <<"sent data nBOnde  "<<rank<<" "<<v1<<" "<<v3 <<" "<<" "<<d1<<" "<<d2<<endl;
 
           bondParams[i].bondType = v1;
           bondParams[i].atomType1 = v2;
@@ -354,7 +355,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 
         ret = sscanf(buf, "%d%d%d%lf%lf", &v1, &v2, &v3, &d1, &d2);
-//        cout <<"received data nBOnde  "<<rank<<" "<<v1<<" "<<v3 <<" "<<" "<<d1<<" "<<d2<<endl;       
+//        cout <<"received data nBOnde  "<<rank<<" "<<v1<<" "<<v3 <<" "<<" "<<d1<<" "<<d2<<endl;
 
         bondParams[i].bondType = v1;
         bondParams[i].atomType1 = v2;
@@ -379,7 +380,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         for (i = 0; i < nAngleTypes; i++)
         {
           fgets(buf, 512, fptr);
-//          cout <<"sent data nAangle at "<<rank<<" are "<<buf<<endl;       
+//          cout <<"sent data nAangle at "<<rank<<" are "<<buf<<endl;
 
           for(int desRank = 1;desRank<size;desRank++)
           {
@@ -387,7 +388,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
             MPI_Send(buf,256,MPI_CHAR,desRank,0,MPI_COMM_WORLD);
           }
           ret= sscanf(buf, "%d%d%d%d%lf%lf", &v1, &v2, &v3, &v4, &d1,&d2);
-//          cout <<"sent data nAangle at "<<rank<<" "<<v1<<" "<<v2<<" "<<v3 <<" "<<v4<<" "<<d1<<" "<<d2<<endl;       
+//          cout <<"sent data nAangle at "<<rank<<" "<<v1<<" "<<v2<<" "<<v3 <<" "<<v4<<" "<<d1<<" "<<d2<<endl;
 
           angleParams[i].angleType = v1;
           angleParams[i].atomType1 = v2;
@@ -405,7 +406,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
 //        MPI::COMM_WORLD.Recv(buf,256,MPI::CHAR,0,0);
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);   // Not sure about Ignore
         ret = sscanf(buf, "%d%d%d%d%lf%lf", &v1, &v2, &v3, &v4, &d1,&d2);
-//        cout <<"received data nAngle at "<<rank<<" "<<v1<<" "<<v2 <<" "<<v3<<" "<<v4<<" "<<d1<<" "<<d2<<endl;       
+//        cout <<"received data nAngle at "<<rank<<" "<<v1<<" "<<v2 <<" "<<v3<<" "<<v4<<" "<<d1<<" "<<d2<<endl;
 
         angleParams[i].angleType = v1;
         angleParams[i].atomType1 = v2;
@@ -436,7 +437,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
 //            MPI::COMM_WORLD.Send(buf,256,MPI::CHAR,desRank,0);
             MPI_Send(buf,256,MPI_CHAR,desRank,0,MPI_COMM_WORLD);
           }
-          
+
           sscanf(buf, "%d%d%d%d%d%lf%lf%lf", &v1,&v2,&v3,&v4,&v5,&d1,&d2,&d3);
           dihedralParams[i].torsionType = v1;
           dihedralParams[i].atomType1 = v2;
@@ -455,9 +456,9 @@ void Parameters::read_sys_data(const char* sysDataFile)
       {
 //        MPI::COMM_WORLD.Recv(buf,256,MPI::CHAR,0,0);
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);   // Not sure about Ignore, elton
-         
+
         sscanf(buf, "%d%d%d%d%d%lf%lf%lf", &v1,&v2,&v3,&v4,&v5,&d1,&d2,&d3);
-//       cout <<"received data nDihedral  "<<rank<<" "<<v1<<" "<<d1 <<" "<<d2<<endl;       
+//       cout <<"received data nDihedral  "<<rank<<" "<<v1<<" "<<d1 <<" "<<d2<<endl;
 
         dihedralParams[i].torsionType = v1;
         dihedralParams[i].atomType1 = v2;
@@ -509,7 +510,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);   // Not sure about Ignore, elton
 
         sscanf(buf, "%d%d%d%d%d%lf%lf%lf", &v1,&v2,&v3,&v4,&v5,&d1,&d2,&d3);
-//        cout <<"received data nImpro  "<<rank<<" "<<v1<<" "<<d1 <<" "<<d3<<endl;       
+//        cout <<"received data nImpro  "<<rank<<" "<<v1<<" "<<d1 <<" "<<d3<<endl;
 
         improperParams[i].torsionType = v1;
         improperParams[i].atomType1 = v2;
@@ -527,7 +528,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
     {
       if(!check_heading("!MolTypes", fptr))
         ERRORMSG("head not match with MolTypes");
-        
+
       if(nMolTypes)
       {
         #ifdef DEBUG
@@ -544,7 +545,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
           }
 
           sscanf(buf, "%d%d%s", &v1, &v2, str1);
-//          cout <<"sent data molType  "<<rank<<" "<<v1<<" "<<v2 <<" "<<str1<<endl;       
+//          cout <<"sent data molType  "<<rank<<" "<<v1<<" "<<v2 <<" "<<str1<<endl;
 
           molTypes[i].molType = v1;
           molTypes[i].numOfAtoms = v2;
@@ -560,7 +561,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
 
         sscanf(buf, "%d%d%s", &v1, &v2, str1);
-//        cout <<"received data molType  "<<rank<<" "<<v1<<" "<<v2 <<" "<<str1<<endl;       
+//        cout <<"received data molType  "<<rank<<" "<<v1<<" "<<v2 <<" "<<str1<<endl;
 
         molTypes[i].molType = v1;
         molTypes[i].numOfAtoms = v2;
@@ -573,7 +574,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
     if(rank == 0)
     {
       if(!check_heading("!Atoms", fptr))
-        ERRORMSG("head not match with Atoms");       
+        ERRORMSG("head not match with Atoms");
       if (nAtoms)
       {
         #ifdef DEBUG
@@ -591,8 +592,8 @@ void Parameters::read_sys_data(const char* sysDataFile)
           }
 
           sscanf(buf, "%d%d%d%d", &v1, &v2, &v3, &v4);
-//          if(i==1499)           
-//          cout <<"sent out data are  "<<rank<<" "<<buf<<endl;       
+//          if(i==1499)
+//          cout <<"sent out data are  "<<rank<<" "<<buf<<endl;
 
           atomArray[v1].atomID = v1;
           atomArray[v1].atomType = v2;
@@ -610,7 +611,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
         sscanf(buf, "%d%d%d%d", &v1, &v2, &v3, &v4);
 //        if(i==1499)
-//        cout <<"receive out data are  "<<rank<<" "<<buf<<endl;       
+//        cout <<"receive out data are  "<<rank<<" "<<buf<<endl;
         atomArray[v1].atomID = v1;
         atomArray[v1].atomType = v2;
         atomArray[v1].molID = v3;
@@ -640,8 +641,8 @@ void Parameters::read_sys_data(const char* sysDataFile)
           }
 
           sscanf(buf, "%d%d%d%d", &v1, &v2, &v3, &v4);
-//          if(i==nBonds-1)           
-//          cout <<"sent out data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<endl;       
+//          if(i==nBonds-1)
+//          cout <<"sent out data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<endl;
 
           bondArray[v1].atom1 = v2;
           bondArray[v1].atom2 = v3;
@@ -656,8 +657,8 @@ void Parameters::read_sys_data(const char* sysDataFile)
 //          MPI::COMM_WORLD.Recv(buf,256,MPI::CHAR,0,0);
           MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
           sscanf(buf, "%d%d%d%d", &v1, &v2, &v3, &v4);
-//          if(i==nBonds-1)           
-//          cout <<"received data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<endl;       
+//          if(i==nBonds-1)
+//          cout <<"received data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<endl;
 
           bondArray[v1].atom1 = v2;
           bondArray[v1].atom2 = v3;
@@ -669,7 +670,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
     if(rank == 0)
     {
       if(!check_heading("!Angles", fptr))
-        ERRORMSG("head not match with Angles");       
+        ERRORMSG("head not match with Angles");
       if(nAngles)
       {
         #ifdef DEBUG
@@ -685,8 +686,8 @@ void Parameters::read_sys_data(const char* sysDataFile)
             MPI_Send(buf,256,MPI_CHAR,desRank,0,MPI_COMM_WORLD);
           }
           sscanf(buf, "%d%d%d%d%d", &v1, &v2, &v3, &v4, &v5);
-//          if(i==nAngles-1)           
-//          cout <<"sent out data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<"  "<<v5<<endl;       
+//          if(i==nAngles-1)
+//          cout <<"sent out data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<"  "<<v5<<endl;
 
           angleArray[v1].atom1 = v2;
           angleArray[v1].atom2 = v3;
@@ -702,8 +703,8 @@ void Parameters::read_sys_data(const char* sysDataFile)
 //          MPI::COMM_WORLD.Recv(buf,256,MPI::CHAR,0,0);
           MPI_Recv(buf,256,MPI_CHAR,0,0,MPI_COMM_WORLD,MPI_STATUS_IGNORE);
           sscanf(buf, "%d%d%d%d%d", &v1, &v2, &v3, &v4, &v5);
-//          if(i==nAngles-1)           
-//          cout <<"received data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<"  "<<v5<<endl;       
+//          if(i==nAngles-1)
+//          cout <<"received data are  "<<rank<<" "<<v1<<" "<<v2<<" "<<v3<<" "<<v4<<"  "<<v5<<endl;
 
           angleArray[v1].atom1 = v2;
           angleArray[v1].atom2 = v3;
@@ -718,7 +719,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
     if(rank ==0)
     {
       if(!check_heading("!Dihedrals", fptr))
-        ERRORMSG("head not match with Dihedrals");       
+        ERRORMSG("head not match with Dihedrals");
       if(nDihedrals)
       {
         #ifdef DEBUG
@@ -763,7 +764,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
     if(rank ==0)
     {
       if(!check_heading("!Impropers", fptr))
-        ERRORMSG("head not match with Impropers");       
+        ERRORMSG("head not match with Impropers");
       if(nImpropers)
       {
         #ifdef DEBUG
@@ -802,7 +803,7 @@ void Parameters::read_sys_data(const char* sysDataFile)
         }
     }
 //    cout<<" the system finished the reading process 7777......... "<<rank<<endl;
-    if(rank ==0 ) 
+    if(rank ==0 )
       fclose(fptr);
 
 //    cout<<" the system finished the reading process 6666........ ."<<rank<<endl;
@@ -832,20 +833,20 @@ int Parameters::check_heading(const char* heading, FILE* fptr)
        return 0;
     // skip following notation line
     fgets(buf, 512, fptr);
-    return 1;    
+    return 1;
 }
 
 void Parameters::build_lj_param_table()
 {
     Int i, j;
-    
+
     #ifdef DEBUG
         DEBUGMSG("build LJ table ");
     #endif
 
     if((ljTableSize == 0) || (ljParamTable == NULL))
         ERRORMSG("build_lj_param_table error");
-    
+
     // lj_table is a triangle table. But duplicat values are set for the table.
     // This simplifies and speeds up the data retrieve in simulation
     for (i = 0; i < ljTableSize; i++)
@@ -858,9 +859,9 @@ void Parameters::build_lj_param_table()
 //    cout<<" the program is coming here in the calcualation   .....................  "<<rank<<endl;
 }
 
-void Parameters::set_lj_param(LJPairParam *ljTable, const AtomParam &ap1,const AtomParam &ap2)                              
+void Parameters::set_lj_param(LJPairParam *ljTable, const AtomParam &ap1,const AtomParam &ap2)
 {
-    Double sigma, eps; 
+    Double sigma, eps;
     Int index;
 
     sigma = (ap1.sigma + ap2.sigma)/2;
@@ -869,7 +870,6 @@ void Parameters::set_lj_param(LJPairParam *ljTable, const AtomParam &ap1,const A
 
     ljTable[index].atomType1 = ap1.atomType;
     ljTable[index].atomType2 = ap2.atomType;
-    ljTable[index].sigma = sigma*sigma;                  
-    ljTable[index].eps = 4.0*eps;    
+    ljTable[index].sigma = sigma*sigma;
+    ljTable[index].eps = 4.0*eps;
 }
-

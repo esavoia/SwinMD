@@ -1,5 +1,5 @@
-/** SimConfiguration.cpp -- implementation to handle input, maintain the global data structure 
- **     and build the simulation system 
+/** SimConfiguration.cpp -- implementation to handle input, maintain the global data structure
+ **     and build the simulation system
  **
  ** Copyright (C) 2003
  ** Centre for Molecular SimConfiguration (CMS)
@@ -13,35 +13,36 @@
 
 #include "SimConfiguration.h"
 #include <mpi.h>
+#include "Errors.h"
 
 SimConfiguration::SimConfiguration(const char configFile[])
 {
-    init();                   // see the below member function 
+    init();                   // see the below member function
     if (configFile == NULL)
         ERRORMSG("missing simulation configuration file");
     sysConfigFile = configFile;
 }
 
 void SimConfiguration::init()
-{ 
+{
     nSteps = 1;   startSteps = 0;   timeStep = 1.0;
     shortTsFreq = 1;                longTsFreq = 4;
     averageTsFreq = nSteps;         printTsFreq = nSteps;
-    backupTsFreq = nSteps;          
+    backupTsFreq = nSteps;
     startSampling = startSteps;     samplingTsFreq = nSteps;
     startTTCF = startSteps;         ttcfTsFreq = nSteps;
     integratorType = 0;
     nBins = 100;
-    couplthermo = 1.0;              couplBaros = 1.0;          
-       
-    lxBox = 1.0;         lyBox = 1.0;         lzBox = 1.0;    
+    couplthermo = 1.0;              couplBaros = 1.0;
+
+    lxBox = 1.0;         lyBox = 1.0;         lzBox = 1.0;
     cutoff = 1.2;        kCutoff = 5;         cutBuff = 0.0;
     cutoffEw = 1.0;
-    rate = 0.0;          cutoffInd = 1.0;     adamp = 200.0;   
-    density = 1.0;       limitRDF = 1.0;      switchDist = 1.0; 
-    nMie = 12.0;	 mMie = 6.0;   
-    nBuff = 14.0;	 mBuff = 7.0;         Hfactor = 0.91; 
-    deltaBuff = 0.07;	 gammaBuff = 0.12;   
+    rate = 0.0;          cutoffInd = 1.0;     adamp = 200.0;
+    density = 1.0;       limitRDF = 1.0;      switchDist = 1.0;
+    nMie = 12.0;	 mMie = 6.0;
+    nBuff = 14.0;	 mBuff = 7.0;         Hfactor = 0.91;
+    deltaBuff = 0.07;	 gammaBuff = 0.12;
     cellSideLen  =1.0;   elapsedTime = 0.0;   temperature = 1.0;
     CFB = 0.0;           DFB = 0.0;        //   pressure  = 1.0;
     tolerance = 0.00001;    maxCount = 10000;   seed = 1;
@@ -51,31 +52,31 @@ void SimConfiguration::init()
     printSysConfig = false;   isNewStart = false;     zeroAverage = true;
     doEquilibrium = true;     doCompression = false;  doShear = false;
     doElongation = false;     computeRDF = false;     computeMSD = false;
-    computeVACF = false;      useTTCF = false;        useCellPairList = false;     
+    computeVACF = false;      useTTCF = false;        useCellPairList = false;
     binaryOutput = false;     constraintOn = false;   useAtomThermo = true;
     switchOn = false;         lCorrectOn = false;
     computeCoulomb = false;   computeEwald = false;   computeSurfCorrect = false;
-    computeWolf = false;      computeMie = false;     computeMultiPol = false; 
+    computeWolf = false;      computeMie = false;     computeMultiPol = false;
     computeInduction = false; dampReal = false;       dampInduction = false;
     dampAmoeba = false;
     doInductionMin = false;   computeTorq = false;    computeBuffvdW = false;
-    hasExtForces = false;     hasFixedAtom = false;   computeharmoUB = false;  
+    hasExtForces = false;     hasFixedAtom = false;   computeharmoUB = false;
     constantVolume = false;   constantPressure = false;
     constantEnergy = false;   constantTemperature = false;
     readVelocity = false;     writeTrajectory = false;   computeLustig = false;
     harmonicbend = false;     amoebabend = false;
 
-    coordinateFile[0] = '\0'; 
-    velocityFile[0] = '\0';     
-    sysDataFile[0] = '\0';;   
-    resultFile[0] = '\0'; 
-    restartFile[0] = '\0'; 
-    trajactoryFile[0] = '\0'; 
-    dumpFile[0] = '\0'; 
+    coordinateFile[0] = '\0';
+    velocityFile[0] = '\0';
+    sysDataFile[0] = '\0';;
+    resultFile[0] = '\0';
+    restartFile[0] = '\0';
+    trajactoryFile[0] = '\0';
+    dumpFile[0] = '\0';
     molTrajectoryFile[0] = '\0';
     molVelocityFile[0] = '\0';
-    thermotype[0] = '\0';   
-    
+    thermotype[0] = '\0';
+
     #ifdef DEBUG
         DEBUGMSG("SimConfiguration initialised");
     #endif
@@ -100,21 +101,21 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
 //    rank = MPI::COMM_WORLD.Get_rank();
 //    size = MPI::COMM_WORLD.Get_size();
 
-//  process 0 reading data from config.txt 
-//    if(rank == 0) { 
+//  process 0 reading data from config.txt
+//    if(rank == 0) {
       cerr << "Opening config file: " << sysConfigFile << endl;
 
       if ((fptr = fopen(sysConfigFile, "r")) == NULL)
-          ERRORMSG("fail to open configuration file");   
+          ERRORMSG("fail to open configuration file");
 
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%s", sysDataFile, coordinateFile);
- 
+
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%s%s", resultFile, restartFile, dumpFile);
       fgets(buf, 512, fptr);
       sscanf(buf, "%s", str1);
-      if (str1[0] == 't') 
+      if (str1[0] == 't')
       {
           writeTrajectory = true;
          sscanf(buf, "%s", trajactoryFile);
@@ -169,7 +170,7 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
       {
           constraintOn = true;
           sscanf(buf, "%d%lf%d", &v1, &tolerance, &maxCount);
-      } 
+      }
       else if (v1 == 0)
       {
           constraintOn = false;
@@ -180,7 +181,7 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
 	  else if (bendingType == 2){
 		 amoebabend = true;
 	  }
-      } 
+      }
 
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%lf%lf", str1, &klUB, &l0UB);
@@ -193,7 +194,7 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
 
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%s%s%s%lf%lf", str1, str2, str3, str4, &alpha, &kCutoff);
-      if (str1[0] == 't') 
+      if (str1[0] == 't')
           computeCoulomb = true;
       if (str2[0] == 't')
       {
@@ -225,10 +226,10 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%s", str1, str2);
       if (str1[0] == 't') hasExtForces = true;
-      if (str2[0] == 't') hasFixedAtom = true;   
+      if (str2[0] == 't') hasFixedAtom = true;
 
       fgets(buf, 512, fptr);
-      sscanf(buf, "%d%d", &startSampling, &samplingTsFreq);    
+      sscanf(buf, "%d%d", &startSampling, &samplingTsFreq);
 
       fgets(buf, 512, fptr);
       sscanf(buf, "%s%d%d", str1, &startTTCF, &ttcfTsFreq);
@@ -261,7 +262,7 @@ void SimConfiguration::read_config_file() // config.txt data is read here and di
 //    MPI::COMM_WORLD.Bcast(dumpFile,80,MPI::CHAR,0);
 //    MPI::COMM_WORLD.Bcast(coordinateFile,80,MPI::CHAR,0);
 //    MPI::COMM_WORLD.Bcast(coordinateFile,80,MPI::CHAR,0);
-//    MPI::COMM_WORLD.Bcast(coordinateFile,80,MPI::CHAR,0);    
+//    MPI::COMM_WORLD.Bcast(coordinateFile,80,MPI::CHAR,0);
 //    MPI::COMM_WORLD.Barrier();                         // good
 //    if(rank != 0) {cout<<"the data stored in the file ...... "<<sysDataFile<<endl;}
     fclose(fptr);
@@ -278,7 +279,7 @@ void SimConfiguration::set_cell_side(Double len)
 }
 
 // set_cutoff() will be called when need to evaluate ewald force
-// first we estimate a cutoff for ewald real space and then the larger cutoff is chosen 
+// first we estimate a cutoff for ewald real space and then the larger cutoff is chosen
 // for both LJ force and ewald real space
 void SimConfiguration::set_cutoff(Int nAtoms, Double volume)
 {
@@ -314,8 +315,8 @@ void SimConfiguration::set_density(Int nAtoms)
 void SimConfiguration::set_temperature(Int nAtoms, Double kinEnergy)
 {
     if (nAtoms > 0) temperature = kinEnergy/(1.5*nAtoms);
-    else temperature = 0.0;                  
-} 
+    else temperature = 0.0;
+}
 
 void SimConfiguration::set_elapsedTime(Double currentSteps)
 {
@@ -329,7 +330,7 @@ void SimConfiguration::set_ensemble_status(Int e, Double v1, Double v2)
     {
         case NVT:
             constantTemperature = true;
-            constantVolume = true;            
+            constantVolume = true;
             temperature = v1;
             volume = v2;
             break;
@@ -372,7 +373,7 @@ void SimConfiguration::set_run_type(Int t)
             doElongation = true;
             break;
     }
-}           
+}
 
 void SimConfiguration::write_config(ofstream &ofp)
 {
@@ -385,7 +386,7 @@ void SimConfiguration::write_config(ofstream &ofp)
     ofp << resultFile << tab << restartFile << tab << trajactoryFile << tab << dumpFile << endl;
     ofp << timeStep << tab << nSteps << tab << startSteps << tab << "//timeStep  nSteps  startSteps"<< endl;
     ofp << shortTsFreq << tab << longTsFreq << tab << "//nonbondTsFreq, longElectTsFreq" << endl;
-    ofp << averageTsFreq << tab << printTsFreq << tab << backupTsFreq << tab;  
+    ofp << averageTsFreq << tab << printTsFreq << tab << backupTsFreq << tab;
     ofp << "// computeAvgTsFreq  printTsFreq  backupTsFreq" << endl;
     ofp << integratorType << tab << "//integrator type: 0 - Gear; 1 - Velocity Verlet" << endl;
     switch(ensembleStatus)
@@ -413,26 +414,26 @@ void SimConfiguration::write_config(ofstream &ofp)
     ofp << lxBox << tab << lyBox << tab << lzBox << tab << "// lxBox  lyBox  lzBox" << endl;
     if (useCellPairList)
        ofp << tab << tab  << cellSideLen <<  tab <<"// useCellPairList   cellSideLen" << endl;
-    else 
-       ofp <<  "f" << tab << cellSideLen << tab << "// useCellPairList   cellSideLen" << endl;  
+    else
+       ofp <<  "f" << tab << cellSideLen << tab << "// useCellPairList   cellSideLen" << endl;
     if (constraintOn) { ofp << "t" << tab;
     ofp << CFB << tab << DFB << tab << TFB << tab << "//constraintOn, CFB, DFB, TFB" << endl;}
     else { ofp << "f" << tab << tolerance << tab << bendingType << tab;
        if (harmonicbend) {
-          ofp << " Harmonic_pot" << tab ; 
+          ofp << " Harmonic_pot" << tab ;
        }
        else if (amoebabend) {
-          ofp << " AMOEBA " << tab ; 
+          ofp << " AMOEBA " << tab ;
        }
        else {
           DEBUGMSG("ACHTUNG: are you ussing a flexible molecule??,");
-	  ERRORMSG("if so, please assing a bending potential in config.txt: 1:Harmonic, 2:Amoeba."); 
+	  ERRORMSG("if so, please assing a bending potential in config.txt: 1:Harmonic, 2:Amoeba.");
        }
-     ofp << "//constraintOn, tol, 1:Harmonic 2:amoeba, bool" << endl;} 
+     ofp << "//constraintOn, tol, 1:Harmonic 2:amoeba, bool" << endl;}
 
     if (computeharmoUB) ofp << "t" << tab;
     else ofp << "f" << tab;
-    ofp <<  klUB << tab << l0UB <<  "// computeharmoUB;  klUB;  l0UB" << endl; 
+    ofp <<  klUB << tab << l0UB <<  "// computeharmoUB;  klUB;  l0UB" << endl;
 
     if (lCorrectOn)  ofp << "t" << tab;
         else  ofp << "f" << tab;
@@ -489,4 +490,3 @@ void SimConfiguration::write_config(ofstream &ofp)
 
     ofp << endl;
 }
-

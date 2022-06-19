@@ -1,4 +1,4 @@
-/** Atom.h -- 
+/** Atom.h --
  **
  ** Copyright (C) 2002
  ** Centre for Molecular Simulation (CMS)
@@ -14,6 +14,7 @@
 #define Atom_H
 
 #include "NEMD_defs.h"
+#include "Errors.h"
 #include "Parameters.h"
 #include "utils/Vector3.h"
 
@@ -24,7 +25,7 @@
 
 class Atom {
     /**
-     ** Data Member - 
+     ** Data Member -
      **/
     // atom info & parameters
     public:
@@ -67,14 +68,14 @@ class Atom {
      ** constructor and destructor
      **/
     public:
-    Atom();  
+    Atom();
     ~Atom();
 
 
     /**
      ** methods
      **/
-    public:    
+    public:
     Int get_list_size() {return currentSize; }
     void clear_pairlist();
     void set_pair(Atom* a);

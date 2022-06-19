@@ -24,7 +24,7 @@ OBJS := $(SRCS:$(SRC_BASE_DIR)/%.cpp=$(OBJS_DIR)/%.o)
 DEPS := $(OBJS:.o=.d)
 
 # Default target name
-TARGET := $(PROD_DIR)/SwinMD.exe
+TARGET := $(PROD_DIR)/SwinMD
 
 RUN_DIR := $(PROD_DIR)/_run
 

@@ -9,8 +9,11 @@
    Email: zzhou@it.swin.edu.au
 
 */
+
+
 #ifndef NEMD_DEFS_H
 #define NEMD_DEFS_H
+
 using namespace std;
 
 #ifdef  MAX
@@ -29,7 +32,7 @@ using namespace std;
 #undef ANINT
 #endif
 #define ANINT(A) ((int)((A)+((A)>=0?.5:-.5)))
-//#define ANINT(A) ((int)((A)+((A)<(-0.5) ? -.5: ((A) > 0.5 ? 0.5 : 0)))) 
+//#define ANINT(A) ((int)((A)+((A)<(-0.5) ? -.5: ((A) > 0.5 ? 0.5 : 0))))
 
 #define SQR(A)		((A)*(A))
 #define CUBE(A)		((A)*(A)*(A))
@@ -66,35 +69,13 @@ typedef char	MD_STR[MD_STR_LEN];
 typedef char	LONG_STR[LONG_STR_LEN];
 typedef void	gptr;                   /* generic ptr */
 
-
-/** debug, error handling**/
- #define DEBUG
-#define WIN32
-
-// #define DEBUGMSG(ofp, args) { ofp << "DBG: " << __FILE__ << " (" << __LINE__ << ") " << args << endl;} 
-
-#define DEBUGMSG(args)   { cerr << "DBG: " << __FILE__ << " (" << __LINE__ << ") " << args << endl;}   
-        // cerr << "DBG: " << __FILE__ << '(' << __LINE__ << "): ";         
-        //cerr << "at timestep [" << timestepnr <<"] "<< args << endl;} 
-
-#define ERRORMSG(args)   {  \
-        cerr << "ERROR: " << __FILE__ << '(' << __LINE__ << "): "; \
-        cerr <<  args << endl;    \
-        exit (1);   }
-             
-/* #define ERRORMSG(ofp, args)   {  \
-        ofp << "ERROR: " << __FILE__ << '(' << __LINE__ << "): "; \
-        ofp <<  args << endl;    \
-        exit (1);   }
-*/
-
 /**  Constants **/
 //--------------------
 // NUMERICAL CONSTANTS - from PROTOMOL/base/protomol_constants.h
 //--------------------
 static const Double ALPHAMIN            = 1e-7;
 static const Double PI                  = 3.14159265358979323846;
-static const Double SQRT_PI             = 1.7724538509055160273;     
+static const Double SQRT_PI             = 1.7724538509055160273;
 // static const Double DTOR                = (PI/180.0);
 
 static const Double SI_C                = 299792458.0;    // [m/s]
@@ -118,7 +99,7 @@ static const Double MUNIT               = SI_AMU;         // atomic mass
 static const Double LUNIT               = 1.0e-9;         // nm
 
 // sqrt(1.0/SI_LENGTH*SI_C*SI_C*1e-7*SI_ELECTRON_CHARGE*
-//      SI_ELECTRON_CHARGE*SI_AVOGADRO/1000) (sqrt[kJ.mol-1.nm.e-2]) 
+//      SI_ELECTRON_CHARGE*SI_AVOGADRO/1000) (sqrt[kJ.mol-1.nm.e-2])
 static const Double SQRTCOULOMBCONSTANT = 11.78708976;    // 1/sqrt(4PI*EPS0)
 static const Double COUlOMBS     =  138.93548501;           // 1/(4PI*EPS0) 86.71955;
 // static const Double SQRTCOULOMBCONSTANT = 1.33207;     // 1/sqrt(4PI*EPS0)
@@ -142,8 +123,28 @@ static const Double TIMEFACTOR          = 48.88821290839616;   // TIMEUNIT is 1/
 static const Int  FASTDELTAMAX          = 32;
 static const Double PDBVELSCALINGFACTOR = 20.45482706;
 
+/*
+
+// #define DEBUGMSG(ofp, args) { ofp << "DBG: " << __FILE__ << " (" << __LINE__ << ") " << args << endl;}
+
+#define DEBUGMSG(args)   { cerr << "DBG: " << __FILE__ << " (" << __LINE__ << ") " << args << endl;}
+        // cerr << "DBG: " << __FILE__ << '(' << __LINE__ << "): ";
+        //cerr << "at timestep [" << timestepnr <<"] "<< args << endl;}
+
+#define ERRORMSG(args)   {  \
+        cerr << "ERROR: " << __FILE__ << '(' << __LINE__ << "): "; \
+        cerr <<  args << endl;    \
+        exit (1);   }
+
+#define ERRORMSG(ofp, args)   {  \
+        ofp << "ERROR: " << __FILE__ << '(' << __LINE__ << "): "; \
+        ofp <<  args << endl;    \
+        exit (1);   }
+*/
+
+
 //--------------------
-// UNITS 
+// UNITS
 //--------------------
 //
 //  r : 1 [AAm]          = 1e-10 [m]

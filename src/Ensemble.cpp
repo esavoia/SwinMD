@@ -1,4 +1,4 @@
-/** Ensemble.c -- 
+/** Ensemble.c --
  **
  ** Copyright (C) 2002
  ** Centre for Molecular Simulation (CMS)
@@ -11,10 +11,10 @@
  **/
 
 #include "Ensemble.h"
- 
+#include "Errors.h" 
 
-Ensemble::Ensemble()  
-{ 
+Ensemble::Ensemble()
+{
     DEBUGMSG("Creating Ensemble object");
 
     nAtoms         = 0;
@@ -95,7 +95,7 @@ Ensemble::Ensemble()
 
     myLustig.ljUlus   = 0.0;
     myLustig.ljdUlus  = 0.0;
-    myLustig.ljd2Ulus = 0.0; 
+    myLustig.ljd2Ulus = 0.0;
     myLustig.virialcorrect = 0.0;
     myLustig.intravirCorrect = 0.0;
     myLustig.longDeriv = 0.0;
@@ -178,7 +178,7 @@ cout << " 3*nAtom = " << nA3 << endl;
 
     if (atoms == NULL || molecules == NULL)
         ERRORMSG("memory allocation of atoms or moleclues error");
- 
+
     // fill atom info to atom object array
     for (i = 0; i < nAtoms; i++)
     {
@@ -186,8 +186,8 @@ cout << " 3*nAtom = " << nA3 << endl;
         charge = myParams->atomParams[type].charge;
 
         atoms[i].atomID = atomStructs[i].atomID;    // should be same as i
-        atoms[i].atomType = type; 
-        atoms[i].molID = atomStructs[i].molID;        
+        atoms[i].atomType = type;
+        atoms[i].molID = atomStructs[i].molID;
         atoms[i].scaledCharge = charge*SQRTCOULOMBCONSTANT;
         atoms[i].dipx = myParams->atomParams[type].dipx;
         atoms[i].dipy = myParams->atomParams[type].dipy;
@@ -200,7 +200,7 @@ cout << " 3*nAtom = " << nA3 << endl;
         atoms[i].quadzz = myParams->atomParams[type].quadzz;
         atoms[i].polar  = myParams->atomParams[type].polar;
         atoms[i].mass = myParams->atomParams[type].mass;
-        atoms[i].typeName = myParams->atomParams[type].typeName; 
+        atoms[i].typeName = myParams->atomParams[type].typeName;
     }
 
     // fill molecular info to molecule objects
@@ -218,12 +218,12 @@ cout << " 3*nAtom = " << nA3 << endl;
     {
         type = atoms[i].atomType;
         id = atoms[i].molID;
-        
+
         molecules[id].mass += atoms[i].mass;
         molecules[id].add_atom(&atoms[i]);
     }
 
-    build_exclusion_table();            
+    build_exclusion_table();
 }
 
 void Ensemble::set_configuration(SimConfiguration* config)
@@ -235,12 +235,12 @@ void Ensemble::set_configuration(SimConfiguration* config)
     nSamples = myConfig->get_n_steps() - myConfig->get_start_sampling();
     interval = myConfig->get_sampling_ts_freq();
     totsteps = myConfig->get_n_steps();
-    if(interval != 0)        
+    if(interval != 0)
         nSamples /= interval;
     deltaT = myConfig->get_timestep();
     computeMSD = myConfig->compute_msd();
     computeVACF = myConfig->compute_vacf();
-    temperature = myConfig->get_temperature(); // Jc: for output the temperature data;    
+    temperature = myConfig->get_temperature(); // Jc: for output the temperature data;
     if (computeMSD || computeVACF)
     {
         time = new Double[nSamples + 1];
@@ -283,14 +283,14 @@ void Ensemble::set_configuration(SimConfiguration* config)
     if (myConfig ->is_new_start())
     {
         char*  coordinateFile = myConfig->get_coordinate_file();
-        FILE*  fptrc = fopen(coordinateFile, "r"); 
+        FILE*  fptrc = fopen(coordinateFile, "r");
         if (fptrc == NULL)
             ERRORMSG("fail to open coordinate file");
         read_coordinate(fptrc);
         if (myConfig->is_read_velocity())
         {
             char* velocityFile = myConfig->get_velocity_file();
-            FILE* fptrv = fopen(velocityFile, "r"); 
+            FILE* fptrv = fopen(velocityFile, "r");
             if (fptrv == NULL)
                 ERRORMSG("fail to open velocity file");
             read_velocity(fptrv);
@@ -314,7 +314,7 @@ void Ensemble::set_configuration(SimConfiguration* config)
         fgets(dump, 512, fptr);             // skip one line
         read_velocity(fptr);
         fclose(fptr);
-    }        
+    }
 }
 
 // Currently, exclusion table is built basing on bonded atom pairs without consideration of 1-4 exclusion.
@@ -328,7 +328,7 @@ void Ensemble::build_exclusion_table()
 
     // reforming bond list in the order of atom ID
     vector < set<int> > bondlist(nAtoms);
-    for (Int i = 0; i < nBonds; i++) 
+    for (Int i = 0; i < nBonds; i++)
     {
         a1=bonds[i].atom1;
         a2=bonds[i].atom2;
@@ -357,10 +357,10 @@ void Ensemble::build_exclusion_table()
     }
 
     // build the table
-    for(Int i = 0; i < nAtoms; i++) 
+    for(Int i = 0; i < nAtoms; i++)
     {
         Int j = 0;
-        for (set<int>::iterator atom=bondlist[i].begin();atom!=bondlist[i].end();atom++) 
+        for (set<int>::iterator atom=bondlist[i].begin();atom!=bondlist[i].end();atom++)
             exclusionTable[i][j++] = *atom;
     }
     // need free bondlist??
@@ -410,8 +410,8 @@ void Ensemble::compute_bound_box()
     // volume = boxLx*boxLy*boxLz;
 
     if ((density = myConfig->get_density()) > 0)
-    {       
-        Double vol = nAtoms/density; 
+    {
+        Double vol = nAtoms/density;
         // default cubic box
         boxLen = pow(vol, 1.0/3.0);
         // boxLen = MAX(MAX(boxLx, boxLy), MAX(boxLz, boxLen));
@@ -445,8 +445,8 @@ void Ensemble::compute_bound_box()
 }
 
 
-// set_pairlist() -- a wraped function to set cell number and dimmensions, 
-//                 -- generate cell list, set index, origin and x, y, z ranks,  
+// set_pairlist() -- a wraped function to set cell number and dimmensions,
+//                 -- generate cell list, set index, origin and x, y, z ranks,
 //                 -- build neighbor cell list for each cell
 //                 -- and build pair list for each atom
 // This function usually called at the starting of simulation
@@ -457,8 +457,8 @@ void Ensemble::set_pairlist()
     pairCutOff *= pairCutOff;
     useCellPairList = myConfig->use_cell_list();
     if (useCellPairList)
-    {   
-        if (myCellManager == NULL)    
+    {
+        if (myCellManager == NULL)
             myCellManager = new CellManager();
         cellLen = myConfig->get_cutoff() + myConfig->get_cutBuff();
         // should reassign 'useCellPairList' flag in case the box is too small for using cell method
@@ -473,7 +473,7 @@ void Ensemble::set_pairlist()
 }
 
 void Ensemble::update_pairlist()
-{ 
+{
     // clear & reinitialise pairlist for each atom
     for(Int i = 0; i < nAtoms; i++)
         atoms[i].clear_pairlist();
@@ -481,7 +481,7 @@ void Ensemble::update_pairlist()
     if (useCellPairList)
     {
         myCellManager->clear_atomlist();
-        for(Int i = 0; i < nAtoms; i++)        
+        for(Int i = 0; i < nAtoms; i++)
             myCellManager->set_atom(&atoms[i]);
         myCellManager->update_pair_list(exclusionTable, pairCutOff);
     }
@@ -494,8 +494,8 @@ void Ensemble::build_pairlist()
     Atom* atomi;
     Atom* atomj;
     Vector3 rij;
-    
-    // pair lists built with following loop are uneven lists 
+
+    // pair lists built with following loop are uneven lists
     // when parallelise the code have to pay attention on the load balance problem
     for (Int i = 0; i < (nAtoms - 1); i++)
     {
@@ -512,7 +512,7 @@ void Ensemble::build_pairlist()
                 ERRORMSG("NULL atom pointer");
             #endif
             if (!exclusion_check(atomi->atomID, atomj->atomID))
-            {                
+            {
                 rij = atomj->position - atomi->position;
                 apply_pbc(rij);
                 if(rij.length2() < pairCutOff)
@@ -521,18 +521,18 @@ void Ensemble::build_pairlist()
                 }
             }
         }
-    }  
+    }
 }
 
-void Ensemble::read_coordinate(char* fname)  // Jc: never used for the coordinate reading 
+void Ensemble::read_coordinate(char* fname)  // Jc: never used for the coordinate reading
 {
-    Int numCoordinates = 0;     
+    Int numCoordinates = 0;
     Int i, v1, ret;
     Double d1, d2, d3;
     char buf[128];
     FILE *fptr;
-    double posTemp[nAtoms][3];   //Jc: temporary storage needed for reading coordinates in Paralle computating       
-    
+    double posTemp[nAtoms][3];   //Jc: temporary storage needed for reading coordinates in Paralle computating
+
     if(rank ==0)
     {
       DEBUGMSG("Reading coordinate using the first method");
@@ -548,15 +548,15 @@ void Ensemble::read_coordinate(char* fname)  // Jc: never used for the coordinat
           fgets(buf, 512, fptr);
           // ret = sscanf(buf, "%d%lf%lf%lf", &v1, &d1, &d2, &d3);
           ret = sscanf(buf, "%lf%lf%lf",  &d1, &d2, &d3);
-          posTemp[i][0] = d1;          
-          posTemp[i][1] = d2;          
-          posTemp[i][2] = d3;          
+          posTemp[i][0] = d1;
+          posTemp[i][1] = d2;
+          posTemp[i][2] = d3;
 
 //ZW          atoms[i].position.x = d1;
 //ZW          atoms[i].position.y = d2;
 //ZW          atoms[i].position.z = d3;
 //ZW          atoms[i].realPos = atoms[i].position;
-      }  
+      }
       fclose(fptr);
     }
 // broadcast coordinates from rank 0
@@ -571,18 +571,18 @@ void Ensemble::read_coordinate(char* fname)  // Jc: never used for the coordinat
       atoms[i].position.y = posTemp[i][1];
       atoms[i].position.z = posTemp[i][2];
       atoms[i].realPos = atoms[i].position;
-    }  
-       
+    }
+
 }
 
-void Ensemble::read_velocity(char* fname)  // Jc: never used for the velocity reading 
+void Ensemble::read_velocity(char* fname)  // Jc: never used for the velocity reading
 {
-    Int numVelocities = 0;     
+    Int numVelocities = 0;
     Int i, v1, ret;
     Double d1, d2, d3;
     char buf[128];
     FILE *fptr;
-    double posTemp[nAtoms][3];   //Jc: temporary storage needed in reading velocity       
+    double posTemp[nAtoms][3];   //Jc: temporary storage needed in reading velocity
 
     if(rank ==0)
     {
@@ -590,20 +590,20 @@ void Ensemble::read_velocity(char* fname)  // Jc: never used for the velocity re
 
       if ((fptr = fopen(fname, "r")) == NULL)
           ERRORMSG("open velocity file error");
-        
+
       fgets(buf, 512, fptr);
       if(((ret=sscanf(buf,"%d", &numVelocities))!= 1)||(numVelocities!= nAtoms))
-          ERRORMSG("read the number of velocities error \n");      
-  
+          ERRORMSG("read the number of velocities error \n");
+
       for (i = 0; i < numVelocities; i++)
       {
         fgets(buf, 512, fptr);
 //Jc;        ret = sscanf(buf, "%d%lf%lf%lf", &v1, &d1, &d2, &d3);
         ret = sscanf(buf, "%lf%lf%lf",  &d1, &d2, &d3);
 
-        posTemp[i][0] = d1;          
-        posTemp[i][1] = d2;          
-        posTemp[i][2] = d3;          
+        posTemp[i][0] = d1;
+        posTemp[i][1] = d2;
+        posTemp[i][2] = d3;
 
 //ZW        atoms[i].velocity.x = d1;
 //ZW        atoms[i].velocity.y = d2;
@@ -622,19 +622,19 @@ void Ensemble::read_velocity(char* fname)  // Jc: never used for the velocity re
       atoms[i].velocity.y = posTemp[i][1];
       atoms[i].velocity.z = posTemp[i][2];
       atoms[i].momentum = atoms[i].mass*atoms[i].velocity;
-    }  
+    }
 }
 
 //JC:  below methods used in the data reading
 
-void Ensemble::read_coordinate(FILE* fptr)  // Jc: used for the coordinate reading 
+void Ensemble::read_coordinate(FILE* fptr)  // Jc: used for the coordinate reading
 {
-    Int numCoordinates = 0;     
+    Int numCoordinates = 0;
     Int i, v1, ret;
     Double d1, d2, d3;
     char buf[128];
-    double posTemp[nAtoms][3];    
-    
+    double posTemp[nAtoms][3];
+
     if(rank == 0)
     {
       DEBUGMSG("Reading coordinate from the 2nd method");
@@ -642,22 +642,22 @@ void Ensemble::read_coordinate(FILE* fptr)  // Jc: used for the coordinate readi
       fgets(buf, 512, fptr);
       if(((ret=sscanf(buf,"%d", &numCoordinates))!= 1)||(numCoordinates!= nAtoms))
           ERRORMSG("read the number of coordiantes error \n");
-        
+
       for (i = 0; i < numCoordinates; i++)
       {
         fgets(buf, 512, fptr);
 //ZW        ret = sscanf(buf, "%d%lf%lf%lf", &v1, &d1, &d2, &d3);
         ret = sscanf(buf, "%lf%lf%lf",  &d1, &d2, &d3);
-        posTemp[i][0] = d1;          
-        posTemp[i][1] = d2;          
-        posTemp[i][2] = d3;          
+        posTemp[i][0] = d1;
+        posTemp[i][1] = d2;
+        posTemp[i][2] = d3;
 //ZW        atoms[i].position.x = d1;
 //ZW        atoms[i].position.y = d2;
 //ZW        atoms[i].position.z = d3;
         // atoms[i].position = atoms[i].position0;
-        
+
       }
-    } 
+    }
 // broadcast coordinates from rank 0
     //MPI::COMM_WORLD.Bcast(&numCoordinates,1,MPI::INT,0);    Updated to MPI-3 by elton
     //MPI::COMM_WORLD.Bcast(posTemp,4500,MPI::DOUBLE,0);
@@ -669,18 +669,18 @@ void Ensemble::read_coordinate(FILE* fptr)  // Jc: used for the coordinate readi
       atoms[i].position.y = posTemp[i][1];
       atoms[i].position.z = posTemp[i][2];
       atoms[i].realPos = atoms[i].position; // Jc: only effective for new start simulation
-    }  
+    }
 }
 
 // Jc: created by Jianhui Li to read the real position from state.in
-void Ensemble::read_realPos(FILE* fptr)  // Jc: used for the reaPos reading 
+void Ensemble::read_realPos(FILE* fptr)  // Jc: used for the reaPos reading
 {
-    Int numCoordinates = 0;     
+    Int numCoordinates = 0;
     Int i, v1, ret;
     Double d1, d2, d3;
     char buf[128];
-    double posTemp[nAtoms][3];    
-    
+    double posTemp[nAtoms][3];
+
     if(rank == 0)
     {
       DEBUGMSG("Reading realPos from the 2nd method");
@@ -688,16 +688,16 @@ void Ensemble::read_realPos(FILE* fptr)  // Jc: used for the reaPos reading
       fgets(buf, 512, fptr);
       if(((ret=sscanf(buf,"%d", &numCoordinates))!= 1)||(numCoordinates!= nAtoms))
           ERRORMSG("read the number of coordiantes error \n");
-        
+
       for (i = 0; i < numCoordinates; i++)
       {
         fgets(buf, 512, fptr);
         ret = sscanf(buf, "%lf%lf%lf",  &d1, &d2, &d3);
-        posTemp[i][0] = d1;          
-        posTemp[i][1] = d2;          
-        posTemp[i][2] = d3;          
+        posTemp[i][0] = d1;
+        posTemp[i][1] = d2;
+        posTemp[i][2] = d3;
       }
-    } 
+    }
 // broadcast coordinates from rank 0
     //MPI::COMM_WORLD.Bcast(&numCoordinates,1,MPI::INT,0);   Updated to MPI-3 by elton
     //MPI::COMM_WORLD.Bcast(posTemp,4500,MPI::DOUBLE,0);
@@ -708,34 +708,34 @@ void Ensemble::read_realPos(FILE* fptr)  // Jc: used for the reaPos reading
       atoms[i].realPos.x = posTemp[i][0];
       atoms[i].realPos.y = posTemp[i][1];
       atoms[i].realPos.z = posTemp[i][2];
-    }  
+    }
 }
 
 void Ensemble::read_velocity(FILE* fptr)  // Jc: used in the velocity reading in continue simulation
 {
-    Int numVelocities = 0;     
+    Int numVelocities = 0;
     Int i, v1, ret;
     Double d1, d2, d3;
     char buf[128];
-    double posTemp[nAtoms][3];              // Jc: temporary storage needed in reading velocity       
+    double posTemp[nAtoms][3];              // Jc: temporary storage needed in reading velocity
 
     if(rank ==0)
     {
 
       DEBUGMSG("Reading velocity from the 2nd method");
-        
+
       fgets(buf, 512, fptr);
       if(((ret=sscanf(buf,"%d", &numVelocities))!= 1)||(numVelocities!= nAtoms))
-        ERRORMSG("read the numbert of velocities error \n");      
+        ERRORMSG("read the numbert of velocities error \n");
 
       for (i = 0; i < numVelocities; i++)
       {
         fgets(buf, 512, fptr);
 //ZW       ret = sscanf(buf, "%d%lf%lf%lf", &v1, &d1, &d2, &d3);
         ret = sscanf(buf, "%lf%lf%lf", &d1, &d2, &d3);
-        posTemp[i][0] = d1;          
-        posTemp[i][1] = d2;          
-        posTemp[i][2] = d3;          
+        posTemp[i][0] = d1;
+        posTemp[i][1] = d2;
+        posTemp[i][2] = d3;
 
 //ZW        atoms[i].velocity.x = d1;
 //ZW        atoms[i].velocity.y = d2;
@@ -754,7 +754,7 @@ void Ensemble::read_velocity(FILE* fptr)  // Jc: used in the velocity reading in
       atoms[i].velocity.y = posTemp[i][1];
       atoms[i].velocity.z = posTemp[i][2];
       atoms[i].momentum = atoms[i].mass*atoms[i].velocity;
-    }  
+    }
 }
 
 
@@ -824,7 +824,7 @@ void Ensemble :: accumulate() // Jc: calculate the Average stress tensor
 
     if (counter > 0.15*totsteps)
     {
-    
+
     int molNDF;
         if(myConfig->is_constraint_on()){
     	    molNDF = 6*nMols - 3;
@@ -869,7 +869,7 @@ void Ensemble :: accumulate() // Jc: calculate the Average stress tensor
     myAvLus.Kinavat += myEnergy.atomKinEnergy;
     myAvLus.invKinat += 1/myEnergy.atomKinEnergy;
     myAvLus.Kin2at += (myEnergy.atomKinEnergy)*(myEnergy.atomKinEnergy);
-    myAvLus.Volnm += voll; 
+    myAvLus.Volnm += voll;
     myAvLus.Volsq += vol2;
 
     myAvLus.bdUdv   +=   -(myLustig.ljdUlus + myLustig.inducDeriv - 3.0*myEnergy.TBEnergy/voll + myLustig.surfDeriv + myLustig.molDeriv + myLustig.surfPolDeriv + myLustig.molPolDeriv + (myLustig.longDeriv + myLustig.realDeriv + myLustig.longPolDeriv + myLustig.realPolDeriv + myLustig.selfPolDeriv + myLustig.ubDeriv + myLustig.BondDeriv)/(3.0*voll))/(temperature*BOLTZMAN) ;
@@ -880,10 +880,10 @@ void Ensemble :: accumulate() // Jc: calculate the Average stress tensor
     myAvLus.UdUdvF  += (myLustig.ljUlus + myEnergy.TBEnergy + myEnergy.inducEnergy + myEnergy.angleEnergy + myEnergy.bondEnergy + myEnergy.ubEnergy + myEnergy.realEnergy + myEnergy.longEnergy + myEnergy.correctEnergy + myEnergy.molCorrectEnergy + myEnergy.surfCorrectEnergy)/(temperature*BOLTZMAN*molNDF*0.5) * ( -(myLustig.ljdUlus + myLustig.inducDeriv - 3.0*myEnergy.TBEnergy/voll + myLustig.surfDeriv + myLustig.molDeriv + (myLustig.longDeriv + myLustig.realDeriv + myLustig.selfPolDeriv + myLustig.ubDeriv + myLustig.BondDeriv)/(3.0*voll))/(temperature*BOLTZMAN) );
 
     atomStress.pressure += myAvLus.P;
-    atomStress.shearStress += (atomPressure[XY] + atomPressure[YX])*0.5;        
-    atomStress.antiShearStress += (atomPressure[YX] - atomPressure[XY])*0.5;   
-    atomStress.firstNormStress += (atomPressure[XX] - atomPressure[YY]);            
-    atomStress.secondNormStress += (atomPressure[YY] - atomPressure[ZZ]);            
+    atomStress.shearStress += (atomPressure[XY] + atomPressure[YX])*0.5;
+    atomStress.antiShearStress += (atomPressure[YX] - atomPressure[XY])*0.5;
+    atomStress.firstNormStress += (atomPressure[XX] - atomPressure[YY]);
+    atomStress.secondNormStress += (atomPressure[YY] - atomPressure[ZZ]);
     molStress.pressure += (molPressure[XX]+molPressure[YY]+molPressure[ZZ])/3.0;
     molStress.shearStress += (molPressure[XY] + molPressure[YX])*0.5;
     molStress.antiShearStress += (molPressure[YX] - molPressure[XY])*0.5;
@@ -892,8 +892,8 @@ void Ensemble :: accumulate() // Jc: calculate the Average stress tensor
 //    cout<<" the calculated Atom pressure ZZ is from Esemble.cpp *** "<<atomPressure[ZZ]<<endl;
     }
 }
-   
-// the sampling() function simply stores molecular trajectory and/or velocity data for 
+
+// the sampling() function simply stores molecular trajectory and/or velocity data for
 // MSD/VACF which will be dumped into files at the end of simulation for later analysis
 void Ensemble :: sampling()
 {
@@ -911,10 +911,10 @@ void Ensemble :: sampling()
             Vmt += molecules[i].myAtoms[j]->momentum;
         }
         if (computeMSD)
-            trajectory[sampleCounter][i] = Rmt/molecules[i].mass;           
+            trajectory[sampleCounter][i] = Rmt/molecules[i].mass;
         if (computeVACF)
             velocity[sampleCounter][i] = Vmt/molecules[i].mass;
-    }    
+    }
 */
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     for(Int i = 0; i < nAtoms; i++)
@@ -930,14 +930,14 @@ void Ensemble :: sampling()
     time[sampleCounter] = sampleCounter*interval*deltaT + time[0];
     sampleCounter++;
 }
- 
+
 void Ensemble :: write_ensemble_info(ofstream &of)
 {
 
     DEBUGMSG("write ensemble info");
 
     char* tab = "       ";
-    
+
     write_sys_data(of);
     of << endl;
 
@@ -983,7 +983,7 @@ void Ensemble::write_pairlist(ofstream &of)
 }
 
 void Ensemble::write_sys_data(ofstream& of)
-{   
+{
     char* tab = "       ";
 
     of << "!sysData file " << endl;
@@ -1059,11 +1059,11 @@ void Ensemble::write_sys_data(ofstream& of)
         of<<i<<tab<<angles[i].atom1<<tab<<angles[i].atom2<<tab<<angles[i].atom3<<tab<<angles[i].angleType<<endl;
     of << endl;
 
-    of << "!Dihedrals" << endl; 
-    of << "!dihedralID atom1      atom2     atom3      atom4      dihedralType" << endl;    
+    of << "!Dihedrals" << endl;
+    of << "!dihedralID atom1      atom2     atom3      atom4      dihedralType" << endl;
     of << endl;
     of << "!Impropers" << endl;
-    of << "!ImproperID atom1      atom2     atom3      atom4      dihedralType" << endl; 
+    of << "!ImproperID atom1      atom2     atom3      atom4      dihedralType" << endl;
     of << endl;
 
     of << "LJ parameter table" << endl;
@@ -1103,7 +1103,7 @@ void Ensemble::write_sys_data(ofstream& of)
                 j++;
         }
         of << endl;
-    }   
+    }
 
 }
 
@@ -1125,7 +1125,7 @@ void Ensemble::write_result(ofstream& of, Int numSteps) // Jc: output pressure t
 //    myEnergy.totEnergy = myEnergy.ljEnergy + myEnergy.realEnergy + myEnergy.longEnergy + myEnergy.correctEnergy;
 //    myEnergy.totEnergy += myEnergy.molCorrectEnergy + myEnergy.surfCorrectEnergy;
     of << fixed << setprecision(6) << setw(16) << myEnergy.totEnergy;
-    if (counter > 0)            // average energy   
+    if (counter > 0)            // average energy
         of << fixed << setprecision(6) << setw(16) << energy/luscount << endl;
 
 }
@@ -1146,7 +1146,7 @@ void Ensemble::write_resultInduction(ofstream& of, Int numSteps) // Output for r
     of << fixed << setprecision(6) << setw(16) << myLustig.molPolDeriv;
     of << fixed << setprecision(6) << setw(16) << myLustig.selfPolDeriv;
     of << fixed << setprecision(6) << setw(16) << myLustig.inducDeriv;
-    if (counter > 0)            // average energy   
+    if (counter > 0)            // average energy
         of << fixed << setprecision(6) << setw(16) << energy/luscount << endl;
 }
 
@@ -1194,7 +1194,7 @@ void Ensemble :: write_lustig(ofstream& of, Int numSteps)
 void Ensemble :: write_TPbylustig(ofstream& of, Int numSteps)
 {
     double M10, M20, M01, M02, M11;
-    double bb, Uu, Cv, Pp, Pvir, Cvens; 
+    double bb, Uu, Cv, Pp, Pvir, Cvens;
     double Cp, ap, Bt, Bs, w2, w;
     double Cpint, Cvint, Bsint, w2int, wint;
     double Hconf, Hconf2, HV, avV, avV2, Z01_bt;
@@ -1238,7 +1238,7 @@ void Ensemble :: write_TPbylustig(ofstream& of, Int numSteps)
 	//---------------------------------------------------------------------------
 	//  Now compute the thermodynamic properties
 	//---------------------------------------------------------------------------
-	Ti = 2.0*myAvLus.Kinavat/NDF/BOLTZMAN/luscount; 
+	Ti = 2.0*myAvLus.Kinavat/NDF/BOLTZMAN/luscount;
 	Uu = myAvLus.Uen/luscount/nMols;		     // in kJ/mol
 	Cv = BOLTZMAN*bb*bb*(M20 - M10*M10)/nMols*1000;      // in J/mol.K
 	Pp = 1.66053904042716*atomStress.pressure/luscount;  // in MPa
@@ -1273,13 +1273,13 @@ void Ensemble :: write_TPbylustig(ofstream& of, Int numSteps)
 
 	    if (volFluc == 0) {
                 Cv  = Cp;
-	    } else { 
+	    } else {
                 Cv  = Cp - HV_HVconf*HV_HVconf/volFluc/(BOLTZMAN*Ti*Ti);
 	    }
 	    ap  = HV_HVconf/avV/(BOLTZMAN*Ti*Ti);
             Bt  = volFluc/(avV*BOLTZMAN*Ti);
             Bs  = Bt*Cv/Cp;
-            w2  = avV/(nMols*18.015*Bs);        // for Water only!!! 
+            w2  = avV/(nMols*18.015*Bs);        // for Water only!!!
             w   = sqrt(w2);
 
 	    // Properties using the interatomic energy
@@ -1287,7 +1287,7 @@ void Ensemble :: write_TPbylustig(ofstream& of, Int numSteps)
 	    Cpint = (Hint2 - Hint*Hint)/(BOLTZMAN*Ti*Ti);
 	    Cvint = Cpint - HV_HV*HV_HV/(avV2 - avV*avV)/(BOLTZMAN*Ti*Ti);
 	    Bsint = Bt*Cvint/Cpint;
-            w2int = avV/(nMols*18.015*Bsint);        // for Water only!!! 
+            w2int = avV/(nMols*18.015*Bsint);        // for Water only!!!
             wint  = sqrt(w2int);
 
 	    // Now in MPa and J/molK units
@@ -1401,12 +1401,12 @@ for (int nm = 0; nm < nMols; nm++){
                 difco1 += co1diff.length();
                 difco2 += co2diff.length();
                 mmden  += MM;
-		
+
 		dr12 = 1.0/co1diff.length();
 		dr32 = 1.0/co2diff.length();
 		cosTheta = (co1diff*co2diff)*dr12*dr32;
-		anglt  += acos(cosTheta)*180.00/PI;	 
-		
+		anglt  += acos(cosTheta)*180.00/PI;
+
 		//vomx += 0.5*(atom0->velocity.x)*MM + 0.5*(atom1->velocity.x)*MM;
 		//vomy += 0.5*(atom0->velocity.y)*MM + 0.5*(atom1->velocity.y)*MM;
 		//vomz += 0.5*(atom0->velocity.z)*MM + 0.5*(atom1->velocity.z)*MM;
@@ -1460,8 +1460,8 @@ for (int nm = 0; nm < nMols; nm++){
                 //vomx += 0.5*(atom0->velocity.x)*MM + 0.5*(atom1->velocity.x)*MM;
                 //vomy += 0.5*(atom0->velocity.y)*MM + 0.5*(atom1->velocity.y)*MM;
                 //vomz += 0.5*(atom0->velocity.z)*MM + 0.5*(atom1->velocity.z)*MM;
-                
-        } 
+
+        }
 	if ( (!strcmp(molecules[nm].molName, "WAT")) ||  (!strcmp(molecules[nm].molName, "MCY"))) {
 		double MM = molecules[nm].mass;
                 ccountt = ccountt + 1;
@@ -1483,11 +1483,11 @@ for (int nm = 0; nm < nMols; nm++){
                 difco1 += co1diff.length();
                 difco2 += co2diff.length();
                 mmden  += MM;
-		
+
 		dr12 = 1.0/co1diff.length();
 		dr32 = 1.0/co2diff.length();
 		cosTheta = (co1diff*co2diff)*dr12*dr32;
-		anglt  += acos(cosTheta)*180.00/PI;	 
+		anglt  += acos(cosTheta)*180.00/PI;
 	}
 
 }
@@ -1510,7 +1510,7 @@ for (int nm = 0; nm < nMols; nm++){
                 difval2 = co2diff.length() - difco2/ccountt;
                 stdco1 += difval1*difval1;
                 stdco2 += difval2*difval2;
-	
+
 		dr12 = 1.0/co1diff.length();
                 dr32 = 1.0/co2diff.length();
                 cosTheta = (co1diff*co2diff)*dr12*dr32;
@@ -1551,7 +1551,7 @@ for (int nm = 0; nm < nMols; nm++){
 
    of << setw(10) << diffv/ccountt << setw(10) << ccvel/ccountt << setw(10) << mmden/(boxLx*boxLy*boxLz)/6.0221408e+23/1000/1e-27;
    of << setw(12) << difco1/ccountt << setw(12) << sqrt(fabs(stdco1)/(ccountt-1)) << setw(12) << difco2/ccountt << setw(12) << sqrt(fabs(stdco2)/(ccountt-1));
-   of << setw(10) << anglt/ccountt << setw(12) << sqrt(fabs(stdangle)/(ccountt-1)); 
+   of << setw(10) << anglt/ccountt << setw(12) << sqrt(fabs(stdangle)/(ccountt-1));
    of << endl;
 
 }
@@ -1560,8 +1560,8 @@ for (int nm = 0; nm < nMols; nm++){
 void Ensemble::write_trajectory(ofstream &of, Int numSteps)
 {
     of << numSteps << endl;
-    for (Int i = 0; i < nAtoms; i++) 
-        of << atoms[i].position.x << '\t'<< atoms[i].position.y << '\t'<< atoms[i].position.z << endl; 
+    for (Int i = 0; i < nAtoms; i++)
+        of << atoms[i].position.x << '\t'<< atoms[i].position.y << '\t'<< atoms[i].position.z << endl;
 }
 
 void Ensemble :: write_bond(Molecule *mol, ofstream &of)
@@ -1578,7 +1578,7 @@ void Ensemble :: write_bond(Molecule *mol, ofstream &of)
         r12 = mol->myAtoms[1]->position - mol->myAtoms[0]->position;
         of << l1 ;
     }
-    else 
+    else
     for(int site = 0; site < (ns-2); site++)
     {
         r12 = mol->myAtoms[site + 1]->position - mol->myAtoms[site]->position;
@@ -1593,7 +1593,7 @@ void Ensemble :: write_bond(Molecule *mol, ofstream &of)
 }
 
 // store MSD/VACF sampling data to files for analysing after simulation
-// currently the results are writen into default files and the data include 
+// currently the results are writen into default files and the data include
 // necessary parameters about each species and the simulation
 void Ensemble::write_sampling_data()
 {
@@ -1607,7 +1607,7 @@ void Ensemble::write_sampling_data()
     {
 //        *msd << nMols << '\t' << "// number of molecules" << endl;
 //        *msd << nMolTypes << '\t' << "// number of molecular types" << endl;
-//        *msd << nSamples  << '\t' << "// total number of samplings" << endl; 
+//        *msd << nSamples  << '\t' << "// total number of samplings" << endl;
 //        *msd << interval  << '\t' << "// interval number of timesteps for sampling" << endl;
 //        *msd << deltaT    << '\t' << "// timeStep of simulation" << endl;
         // molecular info
@@ -1616,7 +1616,7 @@ void Ensemble::write_sampling_data()
         // molecular positions of all samples
         for (Int i = 0; i < nSamples; i++)
         {
-            *msd << nAtoms << endl;/////////////////////////////////////////////////////////////////////////////////////        
+            *msd << nAtoms << endl;/////////////////////////////////////////////////////////////////////////////////////
             *msd << i << endl;
             for (Int nm = 0; nm < nMols; nm++)
                 *msd<<"1"/*myParams->atomParams[i].atomType*/<<'\t'<<trajectory[i][nm].x<<'\t'<<trajectory[i][nm].y<<'\t'<<trajectory[i][nm].z<<endl;
@@ -1627,7 +1627,7 @@ void Ensemble::write_sampling_data()
     {
         *vacf << nMols << '\t' << "// number of molecules" << endl;
         *vacf << nMolTypes << '\t' << "// number of molecular types" << endl;
-        *vacf << nSamples  << '\t' << "// total number of samplings" << endl; 
+        *vacf << nSamples  << '\t' << "// total number of samplings" << endl;
         *vacf << interval  << '\t' << "// interval number of timesteps for sampling" << endl;
         *vacf << deltaT    << '\t' << "// timeStep of simulation" << endl;
         // molecular info
@@ -1644,7 +1644,7 @@ void Ensemble::write_sampling_data()
 }
 
 void Ensemble::random_velocity(unsigned seed)
-{  
+{
     Int i, type, n, ndf;
     Double mass, pxavg, pyavg, pzavg, tavg, scale;
     Vector3* momentum;
@@ -1658,13 +1658,13 @@ void Ensemble::random_velocity(unsigned seed)
             ndf = 3*nAtoms - nBonds - nAngles - 3;
         else
             ndf = 3*nAtoms - 3;
-    }        
-    else    
+    }
+    else
     {
         n = nMols;
         ndf = 3*nMols - 3;
     }
-        
+
     momentum = new Vector3[n];
     pxavg = 0.0;
     pyavg = 0.0;
@@ -1683,12 +1683,12 @@ void Ensemble::random_velocity(unsigned seed)
         momentum[i].z = (Double)rand()/RAND_MAX;
         momentum[i].z = momentum[i].z - 0.5;
         pzavg += momentum[i].z;
-    } 
+    }
     pxavg = pxavg/n;
     pyavg = pyavg/n;
     pzavg = pzavg/n;
 
-    
+
     // zero total momentum
     if(myConfig->use_atom_thermo())
     {
@@ -1697,7 +1697,7 @@ void Ensemble::random_velocity(unsigned seed)
             atoms[i].momentum.x = momentum[i].x - pxavg;
             atoms[i].momentum.y = momentum[i].y - pyavg;
             atoms[i].momentum.z = momentum[i].z - pzavg;
-        
+
             // sum of momentum*velocity
             tavg += atoms[i].momentum.length2()/atoms[i].mass;
         }
@@ -1707,7 +1707,7 @@ void Ensemble::random_velocity(unsigned seed)
         {
             atoms[i].momentum *= scale;
             atoms[i].velocity = atoms[i].momentum/atoms[i].mass;
-        }            
+        }
     }
     else
     {
@@ -1716,7 +1716,7 @@ void Ensemble::random_velocity(unsigned seed)
             molecules[i].momenta.x = momentum[i].x - pxavg;
             molecules[i].momenta.y = momentum[i].y - pyavg;
             molecules[i].momenta.z = momentum[i].z - pzavg;
-        
+
             // sum of momentum*velocity
             tavg += molecules[i].momenta.length2()/molecules[i].mass;
         }
@@ -1726,7 +1726,7 @@ void Ensemble::random_velocity(unsigned seed)
         // temperature - Using Kelvin temperature
         tavg = tavg/(ndf * BOLTZMAN);
 
-        // scale velocities to initial temperature 
+        // scale velocities to initial temperature
         scale = sqrt(myConfig->get_temperature()/tavg);
         for(i = 0; i < n; i++)
         {
@@ -1747,8 +1747,8 @@ void Ensemble::random_velocity(unsigned seed)
  ** The distribution is determined by temperature and (real) mass.
  **
  ** Reference:
- **     Allen & Tildesley, Computer Simulation of Liquids, 1989 
- **/ 
+ **     Allen & Tildesley, Computer Simulation of Liquids, 1989
+ **/
 void Ensemble::init_velocity()
 {
     Int i, n, ndf;
@@ -1764,13 +1764,13 @@ void Ensemble::init_velocity()
             ndf = 3*nAtoms - nBonds - nAngles - 3;
         else
             ndf = 3*nAtoms - 3;
-    }        
-    else    
+    }
+    else
     {
         n = nMols;
         ndf = 3*nMols - 3;
     }
-        
+
     momentum = new Vector3[n];
     pxavg = 0.0;
     pyavg = 0.0;
@@ -1786,7 +1786,7 @@ void Ensemble::init_velocity()
         pxavg += momentum[i].x;
         pyavg += momentum[i].y;
         pzavg += momentum[i].z;
-    }            
+    }
     pxavg = pxavg/n;
     pyavg = pyavg/n;
     pzavg = pzavg/n;
@@ -1823,7 +1823,7 @@ void Ensemble::init_velocity()
             }
         }
     }
-    delete [] momentum;    
+    delete [] momentum;
 }
 
 // generate uniform random number from standard normal Gaussian distribution
@@ -1838,8 +1838,8 @@ Double Ensemble::gauss()
     A3 = 0.252408784;
     A5 = 0.076542912;
     A7 = 0.008355968;
-    A9 = 0.029899776; 
-    
+    A9 = 0.029899776;
+
     sum = 0.0;
     for (int i = 0; i < 12; i++)
         sum += drand();
@@ -1863,14 +1863,14 @@ Double Ensemble::drand()
     return (Double) (seed)/m;
 }
 
-//JC function member created by Jianhui LI in accordence with the 
+//JC function member created by Jianhui LI in accordence with the
 void Ensemble:: write_Potential(ofstream &of)
-{  
-//    of << WPotential <<'\t' << CPotential <<endl;  
+{
+//    of << WPotential <<'\t' << CPotential <<endl;
 }
 
 
-// Jc: function member created by Jianhui LI to output pressure tensor 
+// Jc: function member created by Jianhui LI to output pressure tensor
 // Jc: for shear viscosity calcualtion
 void Ensemble:: write_systemInfo(ofstream &of)
 {
@@ -1881,7 +1881,7 @@ void Ensemble:: write_systemInfo(ofstream &of)
   of<<deltaT<<endl;
 }
 
-// Jc: function member created by Jianhui LI to output pressure tensor 
+// Jc: function member created by Jianhui LI to output pressure tensor
 // Jc: for shear viscosity calcualtion
 
 void Ensemble:: write_pressureTensor(ofstream &of, int counter1)
@@ -1896,19 +1896,19 @@ void Ensemble:: write_pressureTensor(ofstream &of, int counter1)
   of<<scientific<<setw(14)<<(atomPressure[XZ] + atomPressure[ZX])*0.5;
   of<<scientific<<setw(14)<<(atomPressure[XZ]+atomPressure[ZX] + \
     atomPressure[ZY] + atomPressure[YZ]+atomPressure[XY] + atomPressure[YX])/6.0<<endl;
-                
+
   of<<scientific<<"  molXX = "<<molPressure[XX]<<"  molYY = "<<molPressure[YY]<<"  molZZ = "<<molPressure[ZZ];////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   of<<scientific<<"  molXY = "<<molPressure[XY]<<"  molYX = "<<molPressure[YX]<<"  molXZ = "<<molPressure[XZ]<<"  molZX = "<<molPressure[ZX];/////////////////////////////////////////////////////////////////////////////////
-  of<<scientific<<"  molYZ = "<<molPressure[YZ]<<"  molZY = "<<molPressure[ZY];/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////// 
+  of<<scientific<<"  molYZ = "<<molPressure[YZ]<<"  molZY = "<<molPressure[ZY];///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
   of<<scientific<<setw(14)<<(molPressure[XY]  + molPressure[YX])*0.5;
   of<<scientific<<setw(14)<<(molPressure[ZY]  + molPressure[YZ])*0.5;
   of<<scientific<<setw(14)<<(molPressure[XZ]  + molPressure[ZX])*0.5;
   of<<scientific<<setw(14)<<(molPressure[XZ]+molPressure[ZX] + \
-    molPressure[ZY] + molPressure[YZ] + molPressure[XY] + molPressure[YX])/6.0<<endl;                
+    molPressure[ZY] + molPressure[YZ] + molPressure[XY] + molPressure[YX])/6.0<<endl;
 
   of<<scientific<<setw(14)<<atomStress.shearStress/counter;
   of<<scientific<<setw(14)<<molStress.shearStress/counter<<endl;
-    
+
 }
 
 void Ensemble:: write_position(int timeStep)
