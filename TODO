@@ -1,0 +1,2 @@
+MPI params (size & rank) are initialised many times!
+ can't we just use the global mpi_size_g and mpi_rank_g? [and rename them as mpi_size,mpi_rank] They are used only in main()
