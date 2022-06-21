@@ -19,49 +19,51 @@
 #define SIMULATION_H
 
 #include <iostream>
-#include <fstream>
-#include <stdio.h> //??
-#include <vector>
+// #include <fstream>
+// #include <stdio.h> //??
+// #include <vector>
 
-#include "NEMD_defs.h"
+// #include "NEMD_defs.h"
 #include "Parameters.h"
 #include "SimConfiguration.h"
 #include "Ensemble.h"
 
 #include "Integrator.h"
-#include "integrators/GearIntegrator.h"
-#include "integrators/LFIntegrator.h"
-#include "integrators/NHIntegrator.h"
-#include "integrators/VelocityIntegrator.h"
 #include "observables/RDF.h"
 
-#include <mpi.h>   // added by Jianhui // ?? Needed?
-#include "utils/Vector3.h"
-#include "utils/CellManager.h"
+// #include <mpi.h>   // added by Jianhui // ?? Needed?
+//#include "utils/Vector3.h"
+//#include "utils/CellManager.h"
 
 
 class Simulation {
-    private:
+private:
     // I/O file paths/ file names
+    // TODO: many of these can be removed
     const char*   sysConfigFile;    // system config data file
-    const char*   coordinateFile;         // coordinate data file
+    // const char*   coordinateFile;         // coordinate data file
     const char*   sysDataFile;            // molecular system parameters and structures file
-    const char*   velocityFile;
-    const char*   resultFile;
+    // const char*   velocityFile;
+    // const char*   resultFile;
     const char*   trajectoryFile;
-
-    const char*   dumpFile;               // have to consider what data will be dumped into it (?)
-    const char*   restartFile;            // also used as a backup file ?
-	// ofp -> result.out
-	// ofvel -> velbehav.out
-	// ofpr -> pressureResult.out
-	// ofac -> pressureAcum.out
-	// oflu -> Lustig.out
-	// oftp -> ThermoProp.out
-	// ofavl -> LustigAverages.out
-	// ofind -> resultInduction.out
-	// Output streams
-    FILE*   dumpFilePtr;
+    
+    // const char*   dumpFile;               // have to consider what data will be dumped into it (?)
+    // const char*   restartFile;            // also used as a backup file ?
+    
+    // [of] -> sysData.out
+    // ofp -> result.out
+    // ofvel -> velbehav.out
+    // ofpr -> pressureResult.out
+    // ofac -> pressureAcum.out
+    // oflu -> Lustig.out
+    // oftp -> ThermoProp.out
+    // ofavl -> LustigAverages.out
+    // ofind -> resultInduction.out
+	// ofPressureTensor -> pTensor.out
+	
+    // Output streams
+    /* NEVER USED */
+    // FILE*   dumpFilePtr;
     ofstream *ofp; // -> result.out
     ofstream *ofpr; // -> pressureResult.out
     ofstream *ofac; // -> pressureAcum.out
@@ -72,38 +74,39 @@ class Simulation {
     ofstream *ofind; // -> resultInduction.out
     ofstream *ofpTrajectory;
     ofstream *ofPressureTensor;  // -> pTensor.out // JC added by Jianhui Li
-	/* NEVER USED */
-	// ofstream *ofColPotential;    //JC added by Jianhui Li
-
+    /* NEVER USED */
+    // ofstream *ofColPotential;    //JC added by Jianhui Li
+    
     SimConfiguration  *myConfig;
     Ensemble    *myEnsemble;
     Parameters  *myParams;
     Integrator  *myIntegrator;
     RDF         *rdf;
-
-// paralle setup parameters
-    int size,rank;
-
+    
+    // Redundant!
+    // paralle setup parameters
+    // int size,rank; // TODO: remove
+    
+    
     /**
      ** constructor and destructor
      **/
-    public:
-        Simulation(const char configFile[]);
-        ~Simulation();
-
+public:
+    Simulation(const char configFile[]);
+    ~Simulation();
+    
     /**
      ** methods
      **/
-    public:
-        void setup_simulation(void);
-        void run(void);
-        void finish(void);
-		// static unique_ptr<Simulation> build(const char configFile[]) {
-		// 	unique_ptr<Simulation> a = make_unique(Simulation(configFile));
-		// 	// return std::make_unique<Simulation>(configFile);
-		// 	return a;
-		// }
-		static Simulation* build(const char[]);
+private:
+    bool setup_outputs();
+    bool setup_simulation(void);
+    
+public:
+    void run(void);
+    /* NEVER USED */
+    // void finish(void);
+    static Simulation* build(const char[]);
 };
 
 

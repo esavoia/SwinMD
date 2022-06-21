@@ -9,8 +9,9 @@
 #ifndef MPI_V
 #define MPI_V
 
-// These are global variables used only by main
-int mpi_size_g;
-int mpi_rank_g;
+// FIX_THIS: These are global variables are used only by main
+// Now are used also by Simulation
+extern int mpi_size_g;
+extern int mpi_rank_g;
 
 #endif

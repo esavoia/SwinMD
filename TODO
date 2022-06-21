@@ -1,2 +1,10 @@
 MPI params (size & rank) are initialised many times!
  can't we just use the global mpi_size_g and mpi_rank_g? [and rename them as mpi_size,mpi_rank] They are used only in main()
+
+
+Error Checking
+
+Original ERRORMSG(msg) define includes the exit call but not the mod one -> FIX THIS! the mods should be invisible (for now)
+Use ERROR_LOG(msg) for mod and ERRORMSG for exit
+
+In error's MSG/LOG defines is the use of __FILE__, __LINE__ necessary? is it not better to have something like "[mpi_rank/mpi_size]" instead?

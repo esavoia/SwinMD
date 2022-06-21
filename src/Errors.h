@@ -30,17 +30,24 @@
 // Message Intro
 #define FATAL_INTRO   "[" COLOUR_RED "FATAL" COLOUR_RESET "] "
 #define ERROR_INTRO   "[" COLOUR_YELLOW "ERROR" COLOUR_RESET "] "
+#define RUNTIME_INTRO "[" COLOUR_MAGENTA "RUNTIME" COLOUR_RESET "] "
 #define WARN_INTRO    "[" COLOUR_GREEN "WARNING" COLOUR_RESET "] "
 #define DEBUG_INTRO   "[" COLOUR_BLUE "DEBUG" COLOUR_RESET "] "
 
 
-// Always returns FATAL_ERROR code
-#define FATALMSG(msg)   {  cerr << FATAL_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl; }
+// Always returns FATAL_ERROR code [No LOG_FATAL]
+#define FATALMSG(msg)   {  cerr << FATAL_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl; exit(FATAL_ERROR); }
+// #define LOG_FATAL(msg)   cerr << FATAL_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl;
 
-// Can lead to returning RUNTIME_ERROR or UNEXPECTED_ERROR codes.
-#define ERRORMSG(msg)   {  cerr << ERROR_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl; }
+// Always returns UNEXPECTED_ERROR code [No LOG_ERROR]
+#define ERRORMSG(msg)   {  cerr << ERROR_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl; exit(UNEXPECTED_ERROR); }
+// #define LOG_ERROR(msg)  cerr << ERROR_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl;
 
-// Usually no error code is returned after this
+// Can lead to returning RUNTIME_ERROR code [Has LOG_ERR]
+#define ERRMSG(msg)   {  cerr << RUNTIME_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl; exit(RUNTIME_ERROR); }
+#define LOG_ERR(msg)  cerr << RUNTIME_INTRO << __FILE__ << '(' << __LINE__ << "): " << msg << endl;
+
+// No error code is returned after this
 #define WARNMSG(msg)   { cerr << WARN_INTRO << __FILE__ << " (" << __LINE__  << ") " << msg << endl; }
 
 // #define DEBUGMSG(msg)   { cerr << DEBUG_INTRO << __FILE__ << " (" << __LINE__  << ") " << msg << endl; }
@@ -49,6 +56,10 @@
 #else
 #define DEBUGMSG(msg) {;}
 #endif
+
+// LOG function just for sake of completeness
+
+#define LOG(msg) cout << "[ LOG ] " msg << endl;
 
 
 #endif /* Errors_h */
