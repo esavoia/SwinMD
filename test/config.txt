@@ -1,6 +1,6 @@
 sysData.in	coordinate.in		// input file names
 result.out	restart.out    	dump.out	// out put file names
-f	trajactory.out	// writeTrajectory; trajactory file name
+f	trajectory.out	// writeTrajectory; trajectory file name
 t	1	f	velocity.in		//isNewStart;  seed; readVelocity;  velocityFile 
 0.001	20	0	// timeStep;  numSteps;  startSteps
 1	1		// nonbondTsFrequency;   longElectTsFrequency 

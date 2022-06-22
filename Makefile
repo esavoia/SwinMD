@@ -59,7 +59,7 @@ WARNINGS := -Wall -Wextra
 MORE_WARNINGS := -Wshadow -Wpointer-arith -Wcast-align -Wwrite-strings -Wmissing-prototypes -Wmissing-declarations -Wredundant-decls -Wnested-externs -Winline -Wno-long-long -Wuninitialized -Wstrict-prototypes
 
 # C++ flags
-CFLAGS ?= -O2 -g $(WARNINGS)
+CFLAGS ?= -O2 -g $(WARNINGS) -DDEBUG -DUSE_COLOURS
 #CFLAGS ?= -O2 -g3 $(WARNINGS) $(MORE_WARNINGS)
 #CFLAGS := $(CFLAGS) -std=c99 -U__STRICT_ANSI__
 

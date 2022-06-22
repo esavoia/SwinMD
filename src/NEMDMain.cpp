@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
     
     // sim->setup_simulation(); // Absorbed by Simulation::build()
     // Let's go!
-    sim->run();
+    //sim->run();
 
     // Done with MPI
     MPI_Finalize();

@@ -216,7 +216,7 @@ bool Simulation::setup_simulation() {
 	
 	// Handle trajectory storage and filename
 	if(myConfig->write_trajectory()) {
-		trajectoryFile = myConfig->get_trajactory_file();
+		trajectoryFile = myConfig->get_trajectory_file();
 		if (trajectoryFile == NULL){
 			// ERRORMSG("no trajectory file name provided");
 			LOG_ERR("No trajectory file name provided")

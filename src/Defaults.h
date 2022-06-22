@@ -31,4 +31,9 @@
 #define LFIntegrator_TYPE 2
 #define NHIntegrator_TYPE 3
 
+/* CONSTRAINTS CODES */
+#define NO_CONSTRAINT 0
+#define GAUSSIAN_CONSTRAINT 1
+#define SHAKE_CONSTRAINT 2
+
 #endif /* Defaults_h */
