@@ -16,6 +16,7 @@
 
 #include <iostream>
 #include <fstream>
+
 // #include <stdio.h> //???
 // #include <stdlib.h>
 // #include "NEMD_defs.h"
@@ -175,8 +176,10 @@ public:
 	// SimConfiguration();
 	SimConfiguration(const char configFile[]);
 	~SimConfiguration() { ; }
-	
-	
+
+private:
+	void set_run_type(Int tType);
+	void set_ensemble_status(Int e, Double v1, Double v2);
 	/**
 	 ** methods
 	 **/
@@ -198,9 +201,8 @@ public:
 	void set_density(Int nAtoms);
 	void set_temperature(Int nAtoms, Double kinEnergy);
 	void set_elapsedTime(Double currentSteps);
-	//JC        void set_ensemble_status(EnsembleStatus e, Double v1, Double v2);//JC to comply with the new compiler
-	void set_ensemble_status(Int e, Double v1, Double v2);
-	void set_run_type(Int tType);
+	
+	
 	// void set_freedom_degree();
 	
 	// inline Int get_freedom_degree() const { return freedomDegree; }

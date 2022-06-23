@@ -101,7 +101,7 @@
 
 // LOG function just for sake of completeness
 
-#define LOG(msg) cout << "[ LOG ] " msg << endl;
+#define LOG(msg) cout << "[ LOG ] " << msg << endl;
 
 
 #endif /* Errors_h */

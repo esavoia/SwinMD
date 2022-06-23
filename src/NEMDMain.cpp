@@ -40,10 +40,12 @@ int main(int argc, char **argv) {
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size_g);
 
     // Before everything check the cluster size
-    if(mpi_size_g < 1){
+#ifndef SERIAL_RUN
+	if(mpi_size_g < 1){
 		MPI_Finalize();
 		FATALMSG("At least 2 processors must be initialized!")
     }
+#endif
 	// Log something nice:
     char processor_name[MPI_MAX_PROCESSOR_NAME];
     int name_len;
@@ -82,7 +84,7 @@ int main(int argc, char **argv) {
     
     // sim->setup_simulation(); // Absorbed by Simulation::build()
     // Let's go!
-    //sim->run();
+    sim->run();
 
     // Done with MPI
     MPI_Finalize();

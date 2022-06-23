@@ -12,22 +12,21 @@
  **/
 
 #include "SimConfiguration.h"
-// #include <mpi.h>
 #include "Errors.h"
 #include "Defaults.h"
+#include <sstream>
+#include <string>
 
-SimConfiguration::SimConfiguration(const char configFile[])
-{
+SimConfiguration::SimConfiguration(const char configFile[]){
 
 	if (configFile == NULL)
-		ERRORMSG("missing simulation configuration file");
+		ERRORMSG("Missing simulation configuration file");
 	sysConfigFile = configFile;
 	// Initialise data members [Good luck!]
 	init();
 }
 
-void SimConfiguration::init()
-{
+void SimConfiguration::init(){
 	nSteps = 1;   startSteps = 0;   timeStep = 1.0;
 	shortTsFreq = 1;                longTsFreq = 4;
 	averageTsFreq = nSteps;         printTsFreq = nSteps;
@@ -85,237 +84,6 @@ void SimConfiguration::init()
 
 #define SKIP_REST config_s->ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
-void SimConfiguration::read_config_file(){
-	LOG("Opening config file: " << sysConfigFile);
-	ifstream *config_s = new ifstream(sysConfigFile,ios::in);
-	if (!config_s){
-		ERRMSG("Can't open "<< sysConfigFile)
-	}
-
-	*config_s >> sysDataFile >> coordinateFile;
-	SKIP_REST
-
-	*config_s >> resultFile >> restartFile >> dumpFile;
-	SKIP_REST
-
-	string boolFlag;
-	*config_s >> boolFlag; // must output trajectory file
-	if (boolFlag == "t") {
-		writeTrajectory = true;
-		*config_s >> trajectoryFile;
-	}
-	SKIP_REST
-
-	*config_s >> boolFlag; // isNewStart
-	if (boolFlag == "t") {
-		isNewStart = true;
-	}
-
-	*config_s >> seed;
-
-	*config_s >> boolFlag; // readVelocity
-	if (boolFlag == "t") {
-		readVelocity = true;
-	}
-	*config_s >> velocityFile;
-	SKIP_REST
-
-	*config_s >> timeStep >> nSteps >> startSteps;
-	SKIP_REST
-
-	*config_s >> shortTsFreq >> longTsFreq;
-	SKIP_REST
-
-	*config_s >> averageTsFreq >> printTsFreq >> backupTsFreq;
-	SKIP_REST
-
-	*config_s >> integratorType;
-	SKIP_REST
-
-	int ensStatus,atomFlag;
-	double ensParam1,ensParam2;
-
-	*config_s >> ensStatus >> ensParam1 >> ensParam2 >> atomFlag;
-	set_ensemble_status(ensStatus, ensParam1, ensParam2);
-	if (atomFlag != 1){
-		useAtomThermo = false;
-	}
-	*config_s >> couplthermo >> thermotype >> couplBaros;
-	SKIP_REST
-
-	int runType_t;
-	*config_s >> runType_t >> rate;
-	set_run_type(runType_t);
-	SKIP_REST
-
-	*config_s >> cutoff >> cutoffEw >> kCutoff >> cutBuff;
-	SKIP_REST
-
-	*config_s >> density;
-	SKIP_REST
-
-	*config_s >> lxBox >> lyBox >> lzBox;
-	SKIP_REST
-
-	*config_s >> boolFlag >> cellSideLen;
-	if (boolFlag == "t") {
-		useCellPairList = true;
-	}
-	SKIP_REST
-
-	int constraintMode;
-	*config_s >> constraintMode;
-
-	if (constraintMode == GAUSSIAN_CONSTRAINT){ // Gaussan constraint
-		constraintOn = true;
-		*config_s >> CFB >> DFB >> TFB;
-		SKIP_REST
-	} else if (constraintMode == SHAKE_CONSTRAINT){
-		constraintOn = true;
-		*config_s >> tolerance >> maxCount;
-		SKIP_REST
-	} else if (constraintMode == NO_CONSTRAINT){
-		constraintOn = false;
-		*config_s >> tolerance >> bendingType;
-		if (bendingType == 1){
-			harmonicbend = true;
-		}
-		else if (bendingType == 2){
-			amoebabend = true;
-		}
-		SKIP_REST
-	}
-	*config_s >> boolFlag >> klUB >> l0UB;
-
-	if (boolFlag == "t"){
-		computeharmoUB = true;
-	}
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		lCorrectOn = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		switchOn = true;
-	}
-	*config_s >> switchDist;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeCoulomb = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeEwald = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeSurfCorrect = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeWolf = true;
-	}
-	*config_s >> alpha >> kCutoff;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeMultiPol  = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeInduction = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeTorq      = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		dampInduction    = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		doInductionMin   = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		dampAmoeba       = true;
-	}
-	*config_s >> cutoffInd >> adamp;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeBuffvdW = true;
-	}
-	*config_s >> nBuff >> mBuff >> deltaBuff >> gammaBuff >> Hfactor;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeMie = true;
-	}
-	*config_s >> nMie >> mMie;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		hasExtForces = true;
-	}
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		hasFixedAtom = true;
-	}
-	SKIP_REST
-	
-	
-	*config_s >> startSampling >> samplingTsFreq;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		useTTCF = true;
-	}
-	*config_s >> startTTCF >> ttcfTsFreq;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeRDF = true;
-	}
-	*config_s >> nBins;
-	SKIP_REST
-
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeMSD = true;
-	}
-	*config_s >> molTrajectoryFile;
-	SKIP_REST
-	
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeVACF = true;
-	}
-	*config_s >> molVelocityFile;
-	SKIP_REST
-	
-	*config_s >> boolFlag;
-	if (boolFlag == "t"){
-		computeLustig = true;
-	}
-	SKIP_REST
-	
-	DEBUGMSG("close config file" );
-}
-
-
-// config.txt data is read by every process
 void SimConfiguration::read_config_file_old(){
 	int  v1, v2;
 	double d1, d2;
@@ -337,9 +105,10 @@ void SimConfiguration::read_config_file_old(){
 	//  process 0 reading data from config.txt
 	//    if(rank == 0) {
 	// cerr << "Opening config file: " << sysConfigFile << endl;
-	LOG("Opening config file: " << sysConfigFile);
-	ifstream *config_s = new ifstream(sysConfigFile,ios::in);
-	if (!config_s){
+	//LOG("Opening config file: " << sysConfigFile);
+	LOG("Opening config file: " << "config2.txt");
+	ifstream *config_s = new ifstream("config2.txt",ios::in);
+	if (!config_s || !config_s->is_open()){
 		ERRMSG("Can't open "<< sysConfigFile)
 	}
 	if ((fptr = fopen(sysConfigFile, "r")) == NULL)
@@ -915,98 +684,256 @@ void SimConfiguration::read_config_file_old(){
 	fclose(fptr);
 }
 
-void SimConfiguration::set_box(Double lx, Double ly, Double lz)
-{
-	lxBox=lx;   lyBox=ly;   lzBox=lz;
-}
 
-void SimConfiguration::set_cell_side(Double len)
-{
-	cellSideLen=len;
-}
+/*
+ This method calls:
 
-// set_cutoff() will be called when need to evaluate ewald force
-// first we estimate a cutoff for ewald real space and then the larger cutoff is chosen
-// for both LJ force and ewald real space
-void SimConfiguration::set_cutoff(Int nAtoms, Double volume)
-{
-	Double tRate = 5.5;         // default value as established by Moldy
-	Double pVal = -log(accuracy);
-	pVal = sqrt(pVal);
-	alpha = SQRT_PI*pow(tRate*nAtoms/(volume*volume), 1.0/6.0);
-	Double realCut = pVal/alpha;
+	set_run_type(runType_t);
+	set_ensemble_status(ensStatus, ensParam1, ensParam2);
 
-	cutoff = MAX(cutoff, realCut);        // cutOff should be adequate for both LJ force & ewald real space
-	alpha = pVal/cutoff;                  // re-correct alpha based on chosed cutOff
-	kCutoff = 2.0*alpha*pVal;
-}
-
-void SimConfiguration::set_density(Double d)
-{
-	density = d;
-}
-
-void SimConfiguration::set_temperature(Double t)
-{
-	temperature = t;
-}
-
-void SimConfiguration::set_density(Int nAtoms)
-{
-	Double vol;
-	vol = lxBox*lyBox*lzBox;
-	if (vol > 0.0) density = nAtoms/vol;
-	else density = 0.0;
-}
-
-void SimConfiguration::set_temperature(Int nAtoms, Double kinEnergy)
-{
-	if (nAtoms > 0) temperature = kinEnergy/(1.5*nAtoms);
-	else temperature = 0.0;
-}
-
-void SimConfiguration::set_elapsedTime(Double currentSteps)
-{
-	elapsedTime = currentSteps*timeStep;
-}
-
-void SimConfiguration::set_ensemble_status(Int e, Double v1, Double v2)
-{
-	ensembleStatus = (EnsembleStatus)e;
-	switch(ensembleStatus)
-	{
-		case NVT:
-			constantTemperature = true;
-			constantVolume = true;
-			temperature = v1;
-			volume = v2;
-			break;
-		case NPT:
-			constantTemperature = true;
-			constantPressure = true;
-			temperature = v1;
-			pressure = v2;
-			break;
-		case NVE:
-			constantVolume = true;
-			constantEnergy = true;
-			energy = v1;
-			volume = v2;
-			break;
-		case NPE:
-			constantPressure = true;
-			constantEnergy = true;
-			energy = v1;
-			pressure = v2;
-			break;
+ */
+void SimConfiguration::read_config_file(){
+	LOG("Opening config file: " << sysConfigFile);
+	ifstream *config_s = new ifstream(sysConfigFile,ios::in);
+	if (!config_s || !config_s->is_open()){
+		ERRMSG("Can't open "<< sysConfigFile)
 	}
+
+	*config_s >> sysDataFile >> coordinateFile;
+	DEBUGMSG("sysDataFile: '" << sysDataFile << "' coordinateFile: '" << coordinateFile << "'");
+	SKIP_REST
+
+	*config_s >> resultFile >> restartFile >> dumpFile;
+	DEBUGMSG("resultFile: '" << resultFile << "' restartFile: '" << restartFile << "' dumpFile: '" << dumpFile);
+	SKIP_REST
+
+	string boolFlag;
+	*config_s >> boolFlag; // must output trajectory file
+	if (boolFlag == "t") {
+		writeTrajectory = true;
+		*config_s >> trajectoryFile;
+		DEBUGMSG("writeTrajectory = true; \n trajectoryFile: ''" << trajectoryFile << "'");
+	}
+	SKIP_REST
+
+	*config_s >> boolFlag; // isNewStart
+	if (boolFlag == "t") {
+		isNewStart = true;
+		DEBUGMSG("isNewStart = true");
+	}
+
+	*config_s >> seed;
+	DEBUGMSG("seed: "<< seed);
+	*config_s >> boolFlag; // readVelocity
+	if (boolFlag == "t") {
+		readVelocity = true;
+		DEBUGMSG("readVelocity = true");
+	}
+	*config_s >> velocityFile;
+	DEBUGMSG("velocityFile: '" << velocityFile << "'");
+	SKIP_REST
+
+	*config_s >> timeStep >> nSteps >> startSteps;
+	DEBUGMSG("timeStep: '" << timeStep << "' nSteps: '" << nSteps << "' startSteps: '" << startSteps);
+	SKIP_REST
+
+	*config_s >> shortTsFreq >> longTsFreq;
+	DEBUGMSG("shortTsFreq: " << shortTsFreq << " longTsFreq: " << longTsFreq);
+	SKIP_REST
+
+	*config_s >> averageTsFreq >> printTsFreq >> backupTsFreq;
+	DEBUGMSG("averageTsFreq: " << averageTsFreq << " printTsFreq: " << printTsFreq << " backupTsFreq: " << backupTsFreq);
+	SKIP_REST
+
+	*config_s >> integratorType;
+	DEBUGMSG("IntegratorType: " << integratorType);
+	SKIP_REST
+
+	int ensStatus,atomFlag;
+	double ensParam1,ensParam2;
+
+	*config_s >> ensStatus >> ensParam1 >> ensParam2 >> atomFlag;
+	set_ensemble_status(ensStatus, ensParam1, ensParam2);				// NOTE
+	if (atomFlag != 1){
+		useAtomThermo = false;
+	}
+	*config_s >> couplthermo >> thermotype >> couplBaros;
+	SKIP_REST
+
+	int runType_t;
+	*config_s >> runType_t >> rate;
+	set_run_type(runType_t);											// NOTE
+	SKIP_REST
+
+	*config_s >> cutoff >> cutoffEw >> kCutoff >> cutBuff;
+	SKIP_REST
+
+	*config_s >> density;
+	SKIP_REST
+
+	*config_s >> lxBox >> lyBox >> lzBox;
+	SKIP_REST
+
+	*config_s >> boolFlag >> cellSideLen;
+	if (boolFlag == "t") {
+		useCellPairList = true;
+	}
+	SKIP_REST
+
+	int constraintMode;
+	*config_s >> constraintMode;
+
+	if (constraintMode == GAUSSIAN_CONSTRAINT){
+		constraintOn = true;
+		*config_s >> CFB >> DFB >> TFB;
+		SKIP_REST
+	} else if (constraintMode == SHAKE_CONSTRAINT){
+		constraintOn = true;
+		*config_s >> tolerance >> maxCount;
+		SKIP_REST
+	} else if (constraintMode == NO_CONSTRAINT){
+		constraintOn = false;
+		*config_s >> tolerance >> bendingType;
+		if (bendingType == 1){
+			harmonicbend = true;
+		}
+		else if (bendingType == 2){
+			amoebabend = true;
+		}
+		SKIP_REST
+	}
+	*config_s >> boolFlag >> klUB >> l0UB;
+
+	if (boolFlag == "t"){
+		computeharmoUB = true;
+	}
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		lCorrectOn = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		switchOn = true;
+	}
+	*config_s >> switchDist;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeCoulomb = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeEwald = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeSurfCorrect = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeWolf = true;
+	}
+	*config_s >> alpha >> kCutoff;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeMultiPol  = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeInduction = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeTorq      = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		dampInduction    = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		doInductionMin   = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		dampAmoeba       = true;
+	}
+	*config_s >> cutoffInd >> adamp;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeBuffvdW = true;
+	}
+	*config_s >> nBuff >> mBuff >> deltaBuff >> gammaBuff >> Hfactor;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeMie = true;
+	}
+	*config_s >> nMie >> mMie;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		hasExtForces = true;
+	}
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		hasFixedAtom = true;
+	}
+	SKIP_REST
+
+
+	*config_s >> startSampling >> samplingTsFreq;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		useTTCF = true;
+	}
+	*config_s >> startTTCF >> ttcfTsFreq;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeRDF = true;
+	}
+	*config_s >> nBins;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeMSD = true;
+	}
+	*config_s >> molTrajectoryFile;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeVACF = true;
+	}
+	*config_s >> molVelocityFile;
+	SKIP_REST
+
+	*config_s >> boolFlag;
+	if (boolFlag == "t"){
+		computeLustig = true;
+	}
+	SKIP_REST
+
+	DEBUGMSG("close config file" );
 }
 
-void SimConfiguration::set_run_type(Int t)
-{
+void SimConfiguration::set_run_type(Int t){
 	runType =(RunType) t;
-	switch(runType)
-	{
+	switch(runType){
 		case EQUIL:
 			doEquilibrium = true;
 			break;
@@ -1022,13 +949,57 @@ void SimConfiguration::set_run_type(Int t)
 	}
 }
 
-void SimConfiguration::write_config(ofstream &ofp)
-{
-#ifdef DEBUG
-	DEBUGMSG("write config to file");
-#endif
+void SimConfiguration::set_ensemble_status(Int e, Double v1, Double v2){
+	ensembleStatus = (EnsembleStatus)e;
+	switch(ensembleStatus){
+		case NVT:
+			constantTemperature = true;
+			constantVolume = true;
+			temperature = v1;
+			volume = v2;
+			break;
+		case NPT:
+			constantTemperature = true;
+			constantPressure = true;
+			temperature = v1;
+			pressure = v2;
+			break;
+		case NVE:
+			constantVolume = true;
+			constantEnergy = true;
+			energy = v1;
+			volume = v2;
+			break;
+		case NPE:
+			constantPressure = true;
+			constantEnergy = true;
+			energy = v1;
+			pressure = v2;
+			break;
+	}
+}
 
-	char* tab = "     ";
+
+void SimConfiguration::set_box(Double lx, Double ly, Double lz){
+	lxBox=lx;   lyBox=ly;   lzBox=lz;
+}
+
+void SimConfiguration::set_cell_side(Double len){
+	cellSideLen=len;
+}
+
+void SimConfiguration::set_density(Double d){
+	density = d;
+}
+
+void SimConfiguration::write_config(ofstream &ofp){
+
+	DEBUGMSG("Write config to file");
+
+
+	string tab = "     ";
+	//	char tab_char = '\t';
+	//	char space_char = ' ';
 	ofp << sysDataFile << tab << coordinateFile << tab <<  "// input file names" << endl;
 	ofp << resultFile << tab << restartFile << tab << trajectoryFile << tab << dumpFile << endl;
 	ofp << timeStep << tab << nSteps << tab << startSteps << tab << "//timeStep  nSteps  startSteps"<< endl;
@@ -1036,8 +1007,7 @@ void SimConfiguration::write_config(ofstream &ofp)
 	ofp << averageTsFreq << tab << printTsFreq << tab << backupTsFreq << tab;
 	ofp << "// computeAvgTsFreq  printTsFreq  backupTsFreq" << endl;
 	ofp << integratorType << tab << "//integrator type: 0 - Gear; 1 - Velocity Verlet" << endl;
-	switch(ensembleStatus)
-	{
+	switch(ensembleStatus){
 		case NVT:
 			ofp << ensembleStatus << tab << temperature << tab << volume << tab;
 			break;
@@ -1045,8 +1015,12 @@ void SimConfiguration::write_config(ofstream &ofp)
 			ofp << ensembleStatus << tab << temperature << tab << pressure << tab;
 			break;
 		case NVE:
+			// TODO: uncomment to implement
+			// ofp << ensembleStatus << tab << energy << tab << volume << tab;
 			break;
 		case NPE:
+			// TODO: uncomment to implement
+			// ofp << ensembleStatus << tab << energy << tab << pressure << tab;
 			break;
 	}
 	ofp << couplthermo << tab << thermotype << "-thermostat" << tab << couplBaros << tab;
@@ -1071,10 +1045,10 @@ void SimConfiguration::write_config(ofstream &ofp)
 		}
 		else if (amoebabend) {
 			ofp << " AMOEBA " << tab ;
-		}
-		else {
+		} // TODO: remove this eventually move error-checking to read_config_file
+		else { /* This error-checking here is really uncalled for. It should be in read_config_file() */
 			DEBUGMSG("ACHTUNG: are you ussing a flexible molecule??,");
-			ERRORMSG("if so, please assing a bending potential in config.txt: 1:Harmonic, 2:Amoeba.");
+			// ERRORMSG("if so, please assing a bending potential in config.txt: 1:Harmonic, 2:Amoeba.");
 		}
 		ofp << "//constraintOn, tol, 1:Harmonic 2:amoeba, bool" << endl;}
 
@@ -1136,4 +1110,41 @@ void SimConfiguration::write_config(ofstream &ofp)
 	else            ofp << "f          // computeMSD" << endl;
 
 	ofp << endl;
+}
+
+
+/* NOT USED */
+// set_cutoff() will be called when need to evaluate ewald force
+// first we estimate a cutoff for ewald real space and then the larger cutoff is chosen
+// for both LJ force and ewald real space
+void SimConfiguration::set_cutoff(Int nAtoms, Double sysVolume){
+	Double tRate = 5.5;         // default value as established by Moldy
+	Double pVal = -log(accuracy);
+	pVal = sqrt(pVal);
+	alpha = SQRT_PI*pow(tRate*nAtoms/(sysVolume*sysVolume), 1.0/6.0);
+	Double realCut = pVal/alpha;
+
+	cutoff = MAX(cutoff, realCut);        // cutOff should be adequate for both LJ force & ewald real space
+	alpha = pVal/cutoff;                  // re-correct alpha based on chosed cutOff
+	kCutoff = 2.0*alpha*pVal;
+}
+/* NOT USED */
+void SimConfiguration::set_density(Int nAtoms){
+	Double vol;
+	vol = lxBox*lyBox*lzBox;
+	if (vol > 0.0) density = nAtoms/vol;
+	else density = 0.0;
+}
+/* NOT USED */
+void SimConfiguration::set_temperature(Double t){
+	temperature = t;
+}
+/* NOT USED */
+void SimConfiguration::set_temperature(Int nAtoms, Double kinEnergy){
+	if (nAtoms > 0) temperature = kinEnergy/(1.5*nAtoms);
+	else temperature = 0.0;
+}
+/* NOT USED */
+void SimConfiguration::set_elapsedTime(Double currentSteps){
+	elapsedTime = currentSteps*timeStep;
 }

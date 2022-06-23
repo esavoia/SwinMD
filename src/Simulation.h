@@ -19,51 +19,22 @@
 #define SIMULATION_H
 
 #include <iostream>
-// #include <fstream>
-// #include <stdio.h> //??
-// #include <vector>
 
-// #include "NEMD_defs.h"
 #include "Parameters.h"
 #include "SimConfiguration.h"
 #include "Ensemble.h"
-
 #include "Integrator.h"
 #include "observables/RDF.h"
-
-// #include <mpi.h>   // added by Jianhui // ?? Needed?
-//#include "utils/Vector3.h"
-//#include "utils/CellManager.h"
-
 
 class Simulation {
 private:
     // I/O file paths/ file names
-    // TODO: many of these can be removed
-    const char*   sysConfigFile;    // system config data file
-    // const char*   coordinateFile;         // coordinate data file
-    const char*   sysDataFile;            // molecular system parameters and structures file
-    // const char*   velocityFile;
-    // const char*   resultFile;
-    const char*   trajectoryFile;
-    
-    // const char*   dumpFile;               // have to consider what data will be dumped into it (?)
-    // const char*   restartFile;            // also used as a backup file ?
-    
-    // [of] -> sysData.out
-    // ofp -> result.out
-    // ofvel -> velbehav.out
-    // ofpr -> pressureResult.out
-    // ofac -> pressureAcum.out
-    // oflu -> Lustig.out
-    // oftp -> ThermoProp.out
-    // ofavl -> LustigAverages.out
-    // ofind -> resultInduction.out
-	// ofPressureTensor -> pTensor.out
+    const char*   sysConfigFile;    	// System configuration file
+    const char*   sysDataFile;          // Molecular system parameters and structures file
+	const char*   trajectoryFile;		// Trajectory file
 	
     // Output streams
-    /* NEVER USED */
-    // FILE*   dumpFilePtr;
+	// [of] -> sysData.out
     ofstream *ofp; // -> result.out
     ofstream *ofpr; // -> pressureResult.out
     ofstream *ofac; // -> pressureAcum.out
@@ -74,40 +45,37 @@ private:
     ofstream *ofind; // -> resultInduction.out
     ofstream *ofpTrajectory;
     ofstream *ofPressureTensor;  // -> pTensor.out // JC added by Jianhui Li
-    /* NEVER USED */
-    // ofstream *ofColPotential;    //JC added by Jianhui Li
     
+	// Simulation Configuration
     SimConfiguration  *myConfig;
+	// Observables (???)
     Ensemble    *myEnsemble;
-    Parameters  *myParams;
-    Integrator  *myIntegrator;
+    // Molecular System Params
+	Parameters  *myParams;
+	Integrator  *myIntegrator;
     RDF         *rdf;
     
-    // Redundant!
-    // paralle setup parameters
-    // int size,rank; // TODO: remove
     
-    
-    /**
-     ** constructor and destructor
-     **/
 public:
-    Simulation(const char configFile[]);
     ~Simulation();
-    
-    /**
-     ** methods
-     **/
+        
 private:
-    bool setup_outputs();
-    bool setup_simulation(void);
+	// Private Constructor: in this way to have a Simulation Object you have to use the static build function.
+	Simulation(const char configFile[]);
+    // This function setup all output files and initialise their headers when needed
+	// Returns FALSE in case of FAILURE
+	bool setup_outputs();
+	// This function setup the simulation
+	// Returns FALSE in case of FAILURE
+	bool setup_simulation(void);
     
 public:
+	// run the simulation
+	// NOTE: there is no way to escalate an error inside this function to the caller (main), it should return a bool or an err/int flag?
     void run(void);
-    /* NEVER USED */
-    // void finish(void);
+	// Static build function, it build Simulation object.
+	// Returns NULL in case of FAILURE
     static Simulation* build(const char[]);
 };
-
 
 #endif
